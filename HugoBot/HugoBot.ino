@@ -5,9 +5,50 @@
 
 #define NUM_MOTORS 4
 #define MOTOR_LF 0
-#define MOTOR_RF 1
-#define MOTOR_RR 2
-#define MOTOR_LR 3
+#define MOTOR_RF 2
+#define MOTOR_RR 3
+#define MOTOR_LR 1
+
+// Multipliers for direction "correction"
+#define FORWARD            1
+#define REVERSE  (int8_t)-1
+#define STOP               0
+
+// The 9 (including stopped) the bot can move, from the attributions 
+// (https://github.com/pulcher/HugoBot/blob/main/research/attributions.md)
+// page
+#define DIRECTION_NW    0
+#define DIRECTION_N     1
+#define DIRECTION_NE    2
+#define DIRECTION_W     3
+#define DIRECTION_NONE  4
+#define DIRECTION_E     5
+#define DIRECTION_SW    6
+#define DIRECTION_S     7
+#define DIRECTION_SE    8
+
+// rotation is a littl different
+#define DIRECTION_ROTL  9
+#define DIRECTION_ROTN  10
+#define DIRECTION_ROTR  11
+
+#define WHEELS_FRONT 0    // Lookup index for the FRONT wheels, in the "directions" array
+#define WHEELS_REAR  1    // Lookup index for the REAR wheels, in the "directions" array
+
+
+#define WHEELS_LEFT  0    // Lookup index for the LEFT wheel in the inner "directions" array
+#define WHEELS_RIGHT 1    // Lookup index for the READ wheel in the inner "directions" array
+
+const int8_t Front_Wheels[]    = {1, REVERSE};
+const int8_t Rear_Wheels[]     = {1, REVERSE};
+const int8_t All_Wheels[][2]   = {{REVERSE, 1}, {REVERSE, 1}};
+
+const int8_t Directions [12][2][2] = {
+                                    { {STOP, FORWARD},     {FORWARD, STOP}},       {{FORWARD, FORWARD},  {FORWARD, FORWARD}},    {{FORWARD, STOP}, {STOP, FORWARD}       },
+                                    { {REVERSE, FORWARD},  {FORWARD, REVERSE}},    {{STOP, STOP},        {STOP, STOP}},          {{FORWARD, REVERSE}, {REVERSE, FORWARD} },
+                                    { {REVERSE, STOP},  {STOP, REVERSE}},          {{REVERSE, REVERSE},  {REVERSE, REVERSE}},    {{STOP, REVERSE}, {STOP, REVERSE} },
+                                    { {REVERSE, FORWARD},  {REVERSE, FORWARD}},    {{STOP, STOP},        {STOP, STOP}},          {{FORWARD, REVERSE}, {FORWARD, REVERSE} }
+                                 };
 
 MePS2 MePS2(PORT_15);
 
@@ -16,7 +57,7 @@ MeMegaPiDCMotor motor1(PORT1B);
 MeMegaPiDCMotor motor2(PORT2A);
 MeMegaPiDCMotor motor3(PORT2B);
 
-MeMegaPiDCMotor motors[NUM_MOTORS];
+MeMegaPiDCMotor motors[] = {motor0, motor1, motor2, motor3};
 
 int8_t motors_pwm[NUM_MOTORS];
 int8_t motors_pwm_previous[NUM_MOTORS];
@@ -40,11 +81,7 @@ void loop() {
   {
     Serial.println("UP is pressed!");
 
-    motors_pwm[MOTOR_LF] = 100;
-    motors_pwm[MOTOR_RF] = 0;
-    motors_pwm[MOTOR_RR] = 0;
-    motors_pwm[MOTOR_LR] = 0;
-
+    moveBot(DIRECTION_N, 100);
     buttonPressed = true;
   }
 
@@ -52,36 +89,44 @@ void loop() {
   {
     Serial.println("DOWN is pressed!");
 
-    motors_pwm[MOTOR_LF] = -100;
-    motors_pwm[MOTOR_RF] = -100;
-    motors_pwm[MOTOR_RR] = -100;
-    motors_pwm[MOTOR_LR] = -100;
-
+    moveBot(DIRECTION_S, 100);
     buttonPressed = true;
   }
 
   if (MePS2.ButtonPressed(MeJOYSTICK_LEFT))
   {
     Serial.println("LEFT is pressed!");
+        
+    moveBot(DIRECTION_W, 100);
+    buttonPressed = true;
   }
 
   if (MePS2.ButtonPressed(MeJOYSTICK_RIGHT))
   {
     Serial.println("RIGHT is pressed!");
+
+    moveBot(DIRECTION_E, 100);
+    buttonPressed = true;
   }
 
-  // if (MePS2.ButtonPressed(MeJOYSTICK_TRIANGLE))
-  // {
-  //   Serial.println("TRIANGLE is pressed!");
-  // }
+  if (MePS2.ButtonPressed(MeJOYSTICK_TRIANGLE))
+  {
+    Serial.println("TRIANGLE(1) is pressed!");
+
+    moveBot(DIRECTION_ROTL, 100);
+    buttonPressed = true;
+  }
   // if (MePS2.ButtonPressed(MeJOYSTICK_XSHAPED))
   // {
   //   Serial.println("XSHAPED is pressed!");
   // }
-  // if (MePS2.ButtonPressed(MeJOYSTICK_SQUARE))
-  // {
-  //   Serial.println("SQUARE is pressed!");
-  // }
+  if (MePS2.ButtonPressed(MeJOYSTICK_SQUARE))
+  {
+    Serial.println("SQUARE(4) is pressed!");
+
+    moveBot(DIRECTION_ROTR, 100);
+    buttonPressed = true;
+  }
   // if (MePS2.ButtonPressed(MeJOYSTICK_ROUND))
   // {
   //   Serial.println("ROUND is pressed!");
@@ -97,10 +142,13 @@ void loop() {
   //   Serial.println("SELECT is pressed!");
   // }
 
-  // if (MePS2.ButtonPressed(MeJOYSTICK_BUTTON_L))
-  // {
-  //   Serial.println("BUTTON_L is pressed!");
-  // }
+  if (MePS2.ButtonPressed(MeJOYSTICK_L1))
+  {
+    Serial.println("BUTTON_L1 is pressed!");
+
+    moveBot(DIRECTION_NW, 100);
+    buttonPressed = true;
+  }
 
   // if (MePS2.ButtonPressed(MeJOYSTICK_BUTTON_R))
   // {
@@ -110,13 +158,10 @@ void loop() {
   handleJoystick(MeJOYSTICK_RX, MeJOYSTICK_RY);
 
   if (!buttonPressed) {
-    motors_pwm[MOTOR_LF] = 0;
-    motors_pwm[MOTOR_RF] = 0;
-    motors_pwm[MOTOR_RR] = 0;
-    motors_pwm[MOTOR_LR] = 0;
+    moveBot(DIRECTION_NONE, 0);
   }
   
-  handleMotors();
+  //handleMotors();
 
   buttonPressed = false;
 }
@@ -140,15 +185,37 @@ void handleJoystick(uint8_t x, uint8_t y) {
 }
 
 void handleMotors() {
-  for(int i = 0; i < NUM_MOTORS; i++) {
-    if (motors_pwm[i] != motors_pwm_previous[i]) {
-      motors_pwm_previous[i] = motors_pwm[i];
-    }
-  }
+  // for(int i = 0; i < NUM_MOTORS; i++) {
+  //   if (motors_pwm[i] != motors_pwm_previous[i]) {
+  //     motors_pwm_previous[i] = motors_pwm[i];
+  //   }
+  // }
 
-  motor0.run(motors_pwm[0]);
-  motor1.run(motors_pwm[1]);
-  motor2.run(motors_pwm[2]);
-  motor3.run(motors_pwm[3]);
+  // motor0.run(motors_pwm[0]);
+  // motor1.run(motors_pwm[1]);
+  // motor2.run(motors_pwm[2]);
+  // motor3.run(motors_pwm[3]);
+}
+
+void moveBot(uint8_t botDirection, uint16_t speed) {
+  auto direction = Directions[botDirection];
+  Serial.print("botDirection: ");
+  Serial.print(botDirection);
+  Serial.print(", ");
+  Serial.print("direction[WHEELS_FRONT][WHEELS_LEFT]: ");
+  Serial.print(direction[WHEELS_FRONT][WHEELS_LEFT]);
+  Serial.print(", ");
+  Serial.print("All_Wheels[WHEELS_FRONT][WHEELS_LEFT]: ");
+  Serial.print(All_Wheels[WHEELS_FRONT][WHEELS_LEFT]);
+  Serial.println("");
+
+  setWheelSpeed(MOTOR_LF, direction[WHEELS_FRONT][WHEELS_LEFT]  * All_Wheels[WHEELS_FRONT][WHEELS_LEFT]  * speed);
+  setWheelSpeed(MOTOR_RF, direction[WHEELS_FRONT][WHEELS_RIGHT] * All_Wheels[WHEELS_FRONT][WHEELS_RIGHT] * speed);
+  setWheelSpeed(MOTOR_LR, direction[WHEELS_REAR][WHEELS_LEFT]   * All_Wheels[WHEELS_REAR][WHEELS_LEFT]   * speed);
+  setWheelSpeed(MOTOR_RR, direction[WHEELS_REAR][WHEELS_RIGHT]  * All_Wheels[WHEELS_REAR][WHEELS_RIGHT]  * speed);
+}
+
+void setWheelSpeed(int8_t motorIdx, int16_t speed) {
+  motors[motorIdx].run(speed);
 }
 
