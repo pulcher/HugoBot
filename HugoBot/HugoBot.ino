@@ -46,7 +46,7 @@ const int8_t All_Wheels[][2]   = {{REVERSE, 1}, {REVERSE, 1}};
 const int8_t Directions [12][2][2] = {
                                     { {STOP, FORWARD},     {FORWARD, STOP}},       {{FORWARD, FORWARD},  {FORWARD, FORWARD}},    {{FORWARD, STOP}, {STOP, FORWARD}       },
                                     { {REVERSE, FORWARD},  {FORWARD, REVERSE}},    {{STOP, STOP},        {STOP, STOP}},          {{FORWARD, REVERSE}, {REVERSE, FORWARD} },
-                                    { {REVERSE, STOP},  {STOP, REVERSE}},          {{REVERSE, REVERSE},  {REVERSE, REVERSE}},    {{STOP, REVERSE}, {STOP, REVERSE} },
+                                    { {REVERSE, STOP},  {STOP, REVERSE}},          {{REVERSE, REVERSE},  {REVERSE, REVERSE}},    {{STOP, REVERSE}, {REVERSE, STOP} },
                                     { {REVERSE, FORWARD},  {REVERSE, FORWARD}},    {{STOP, STOP},        {STOP, STOP}},          {{FORWARD, REVERSE}, {FORWARD, REVERSE} }
                                  };
 
@@ -147,6 +147,30 @@ void loop() {
     Serial.println("BUTTON_L1 is pressed!");
 
     moveBot(DIRECTION_NW, 100);
+    buttonPressed = true;
+  }
+
+  if (MePS2.ButtonPressed(MeJOYSTICK_L2))
+  {
+    Serial.println("BUTTON_L2 is pressed!");
+
+    moveBot(DIRECTION_SW, 100);
+    buttonPressed = true;
+  }
+
+  if (MePS2.ButtonPressed(MeJOYSTICK_R1))
+  {
+    Serial.println("BUTTON_R1 is pressed!");
+
+    moveBot(DIRECTION_NE, 100);
+    buttonPressed = true;
+  }
+
+  if (MePS2.ButtonPressed(MeJOYSTICK_R2))
+  {
+    Serial.println("BUTTON_R2 is pressed!");
+
+    moveBot(DIRECTION_SE, 100);
     buttonPressed = true;
   }
 
