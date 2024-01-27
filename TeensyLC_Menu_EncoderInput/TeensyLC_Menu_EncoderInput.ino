@@ -41,9 +41,24 @@
 #include "Adafruit_ST7735.h"
 #include "Adafruit_ST7735_Menu.h"
 #include "Colors.h"
+#include <Adafruit_seesaw.h>
 #include <Encoder.h>
+// found in \Arduino\libraries\Adafruit-GFX-Library-master
+#include "fonts\FreeSans9pt7b.h"
+#include "fonts\FreeSans12pt7b.h"
+#include "fonts\FreeSans18pt7b.h"
+#include "fonts\FreeSansBold9pt7b.h"
+#include "fonts\FreeSansBold12pt7b.h"
+#include "fonts\FreeSansOblique9pt7b.h"
 
 #define DATA_COLUMN 85
+
+#define SEESAW_ADDR      0x49
+#define SS_SWITCH_SELECT 1
+#define SS_SWITCH_UP     2
+#define SS_SWITCH_LEFT   3
+#define SS_SWITCH_DOWN   4
+#define SS_SWITCH_RIGHT  5
 
 // esp32 pinouts
 #define TFT_DC 8
@@ -57,9 +72,14 @@
 #define SE_PIN 6
 
 // easy way to include fonts but change globally
-#define FONT_MICRO 1  // font for menus
-#define FONT_SMALL 2  // font for menus
-#define FONT_TITLE 3  // font for menus
+// #define FONT_MICRO 1  // font for menus
+// #define FONT_SMALL 2  // font for menus
+// #define FONT_TITLE 3  // font for menus
+#define FONT_SMALL FreeSans9pt7b      // font for menus
+#define FONT_EDITTITLE FreeSans9pt7b  // font for menus
+#define FONT_ITEM FreeSans9pt7b       // font for menus
+#define FONT_TITLE FreeSans9pt7b      // font for all headings
+#define FONT_SMALL_OB FreeSansOblique9pt7b
 
 #define DEBOUNCE 100
 
@@ -80,12 +100,7 @@
 #define MENU_HIGHLIGHT C_RED
 #define MENU_HIGHBORDER C_DKRED
 
-
-
 #define MENU_DISABLE C_GREY
-
-
-
 
 int MenuOption = 0;
 int AllowColorMenu = 0;
@@ -115,8 +130,10 @@ const char *OffOnItems[] = { "Off", "On" };
 const char *DataRateItems[] = { "300b", "1.2kb", "2.4kb", "4.8kb", "9.6kb", "19.2kb", "56kb" };
 
 // you know the drill
-//Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+
+// fire up the seesaw interface.
+Adafruit_seesaw ss(&Wire1);
 
 // required, you must create either an Item menu (no inline editing) or an EditMenu (allows inline editing)
 //ClassName YourMenuName(&DisplayObject, True=Touch input, False(Default)=mechanical input);
@@ -129,45 +146,51 @@ EditMenu OptionMenu(&Display);    // default is false, need not specify
 EditMenu WirelessMenu(&Display);  // or you can still call false to force mechanical input selection
 EditMenu ServoMenu(&Display);
 
-Encoder encoder(EN1_PIN, EN2_PIN);
+//Encoder encoder(EN1_PIN, EN2_PIN);
 
 void setup() {
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // button in the encoder
   pinMode(SE_PIN, INPUT_PULLUP);
 
   // fire up the display
   Display.initR(INITR_GREENTAB);
-  Display.setRotation(1);
+  Display.setRotation(3);
 
-  /*
-  while (1) {
-
-    long newPosition = encoder.read();
-    if (newPosition != oldPosition) {
-      oldPosition = newPosition;
-      Serial.println(newPosition);
-    }
-    if (digitalRead(SE_PIN) == LOW) {
-      Serial.println("button press");
-    }
-    delay(100);
+  // Initialize the SeeSaw
+  if(!ss.begin(SEESAW_ADDR)) {
+    Serial.println(F("Unable to find SeeSaw"));
+    while(1);
   }
-*/
 
-  MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 30, 3, "Main", FONT_SMALL, FONT_TITLE);
+  Serial.println("Found Product 5740");
+
+  ss.pinMode(SS_SWITCH_UP, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_DOWN, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_LEFT, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_RIGHT, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_SELECT, INPUT_PULLUP);
+
+  // get starting position
+  Position = ss.getEncoderPosition();
+
+  Serial.println("Turning on interrupts");
+  ss.enableEncoderInterrupt();
+  ss.setGPIOInterrupts((uint32_t)1 << SS_SWITCH_UP, 1);
+
+  MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 3, "Main", FONT_SMALL, FONT_TITLE);
 
   MenuOption1 = MainMenu.addNI("Options");
   MenuOption2 = MainMenu.addNI("Wireless");
   MenuOption3 = MainMenu.addNI("Servos");
 
   MainMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  MainMenu.setTitleBarSize(0, 0, 160, 30);
-  MainMenu.setTitleTextMargins(10, 5);
+  MainMenu.setTitleBarSize(0, 0, 160, 20);
+  MainMenu.setTitleTextMargins(10, 15);
   MainMenu.setMenuBarMargins(0, 160, 2, 1);
-  MainMenu.setItemTextMargins(10, 10, 5);
+  MainMenu.setItemTextMargins(10, 15, 5);
   MainMenu.setItemColors(C_GREY, MENU_SELECTBORDER);
 
   OptionMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
@@ -202,8 +225,9 @@ void setup() {
   WirelessMenu.setMenuBarMargins(0, 160, 2, 1);
   WirelessMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
   WirelessMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+
   ServoMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                 DATA_COLUMN, 15, 6, "Servos", FONT_MICRO, FONT_SMALL);
+                 DATA_COLUMN, 20, 5, "Servos", FONT_SMALL, FONT_SMALL);
   ServoMenu1 = ServoMenu.addNI("Address", 0, 0, 255, 1, 0);
   ServoMenu2 = ServoMenu.addNI("Prec", 2, 0, sizeof(PrecisionItems) / sizeof(PrecisionItems[0]), 1, 0, PrecisionItems);
   ServoMenu3 = ServoMenu.addNI("Tune", 2, 0, sizeof(TuneItems) / sizeof(TuneItems[0]), 1, 0, TuneItems);
@@ -211,10 +235,10 @@ void setup() {
   ServoMenu5 = ServoMenu.addNI("Tune", 2, 0, sizeof(TuneItems) / sizeof(TuneItems[0]), 1, 0, TuneItems);
   ServoMenu6 = ServoMenu.addNI("State", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
 
-  ServoMenu.setTitleBarSize(0, 0, 160, 30);
-  ServoMenu.setTitleTextMargins(10, 5);
-  ServoMenu.setItemTextMargins(10, 5, 2);
-  ServoMenu.setMenuBarMargins(0, 160, 0, 0);
+  ServoMenu.setTitleBarSize(0, 0, 160, 20);
+  ServoMenu.setTitleTextMargins(10, 15);
+  ServoMenu.setItemTextMargins(10, 15, 10);
+  ServoMenu.setMenuBarMargins(0, 160, 2, 1);
   ServoMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
   ServoMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
@@ -247,14 +271,14 @@ void ProcessMainMenu() {
   while (MainMenuOption != 0) {
 
     // standard encoder read
-    Position = encoder.read();
+    Position = ss.getEncoderPosition(); //encoder.read();
     delay(DEBOUNCE);
     // attempt to debouce these darn things...
     if ((Position - oldPosition) > 0) {
 
       while (oldPosition != Position) {
         oldPosition = Position;
-        Position = encoder.read();
+        Position = ss.getEncoderPosition(); //encoder.read();
         delay(DEBOUNCE);
       }
 
@@ -268,7 +292,7 @@ void ProcessMainMenu() {
 
       while (oldPosition != Position) {
         oldPosition = Position;
-        Position = encoder.read();
+        Position = ss.getEncoderPosition(); //encoder.read();
         delay(DEBOUNCE);
       }
       // once encoder calms down and is done cycling, move selector up
@@ -278,10 +302,11 @@ void ProcessMainMenu() {
     }
 
     // but wait...the user pressed the button on the encoder
-    if (digitalRead(SE_PIN) == LOW) {
+    //if (digitalRead(SE_PIN) == LOW) {
+      if (!ss.digitalRead(SS_SWITCH_SELECT)) {
 
       // debounce the button press
-      while (digitalRead(SE_PIN) == LOW) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
         delay(DEBOUNCE);
       }
 
@@ -344,14 +369,14 @@ void ProcessOptionMenu() {
   while (EditMenuOption != 0) {
 
     // standard encoder read
-    Position = encoder.read();
+    Position = ss.getEncoderPosition(); // encoder.read();
     delay(DEBOUNCE);
     // attempt to debouce these darn things...
     if ((Position - oldPosition) > 0) {
 
       while (oldPosition != Position) {
         oldPosition = Position;
-        Position = encoder.read();
+        Position = ss.getEncoderPosition();// encoder.read();
         delay(DEBOUNCE);
       }
 
@@ -362,17 +387,17 @@ void ProcessOptionMenu() {
 
       while (oldPosition != Position) {
         oldPosition = Position;
-        Position = encoder.read();
+        Position = ss.getEncoderPosition();// encoder.read();
         delay(DEBOUNCE);
       }
 
       OptionMenu.MoveDown();
     }
 
-    if (digitalRead(SE_PIN) == LOW) {
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
 
       // debounce the selector button
-      while (digitalRead(SE_PIN) == LOW) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
         delay(DEBOUNCE);
       }
       // use the selectRow to
@@ -397,13 +422,13 @@ void ProcessWirelessMenu() {
 
   while (EditMenuOption != 0) {
 
-    Position = encoder.read();
+    Position = ss.getEncoderPosition(); //encoder.read();
 
 
     if ((Position - oldPosition) > 0) {
       while (oldPosition != Position) {
         oldPosition = Position;
-        Position = encoder.read();
+        Position = ss.getEncoderPosition(); // encoder.read();
         delay(DEBOUNCE);
       }
 
@@ -414,17 +439,17 @@ void ProcessWirelessMenu() {
     if ((Position - oldPosition) < 0) {
       while (oldPosition != Position) {
         oldPosition = Position;
-        Position = encoder.read();
+        Position = ss.getEncoderPosition(); //encoder.read();
         delay(DEBOUNCE);
       }
 
       WirelessMenu.MoveDown();
     }
 
-    if (digitalRead(SE_PIN) == LOW) {
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
 
       // debounce the selector button
-      while (digitalRead(SE_PIN) == LOW) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
         delay(DEBOUNCE);
       }
 
@@ -443,12 +468,12 @@ void ProcessServoMenu() {
 
   while (EditMenuOption != 0) {
 
-    Position = encoder.read();
+    Position = ss.getEncoderPosition(); // encoder.read();
     delay(DEBOUNCE);
     if ((Position - oldPosition) > 0) {
       while (oldPosition != Position) {
         oldPosition = Position;
-        Position = encoder.read();
+        Position = ss.getEncoderPosition(); // encoder.read();
         delay(DEBOUNCE);
       }
       ServoMenu.MoveUp();
@@ -457,16 +482,16 @@ void ProcessServoMenu() {
     if ((Position - oldPosition) < 0) {
       while (oldPosition != Position) {
         oldPosition = Position;
-        Position = encoder.read();
+        Position = ss.getEncoderPosition(); // encoder.read();
         delay(DEBOUNCE);
       }
       ServoMenu.MoveDown();
     }
 
-    if (digitalRead(SE_PIN) == LOW) {
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
 
       // debounce the selector button
-      while (digitalRead(SE_PIN) == LOW) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
         delay(DEBOUNCE);
       }
 
