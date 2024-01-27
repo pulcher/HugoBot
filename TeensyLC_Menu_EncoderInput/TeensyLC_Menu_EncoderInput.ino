@@ -49,6 +49,7 @@
 #include "fonts\FreeSans18pt7b.h"
 #include "fonts\FreeSansBold9pt7b.h"
 #include "fonts\FreeSansBold12pt7b.h"
+#include "fonts\FreeSansOblique9pt7b.h"
 
 #define DATA_COLUMN 85
 
@@ -78,6 +79,7 @@
 #define FONT_EDITTITLE FreeSans9pt7b  // font for menus
 #define FONT_ITEM FreeSans9pt7b       // font for menus
 #define FONT_TITLE FreeSans9pt7b      // font for all headings
+#define FONT_SMALL_OB FreeSansOblique9pt7b
 
 #define DEBOUNCE 100
 
@@ -128,7 +130,6 @@ const char *OffOnItems[] = { "Off", "On" };
 const char *DataRateItems[] = { "300b", "1.2kb", "2.4kb", "4.8kb", "9.6kb", "19.2kb", "56kb" };
 
 // you know the drill
-//Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
 // fire up the seesaw interface.
@@ -145,7 +146,7 @@ EditMenu OptionMenu(&Display);    // default is false, need not specify
 EditMenu WirelessMenu(&Display);  // or you can still call false to force mechanical input selection
 EditMenu ServoMenu(&Display);
 
-Encoder encoder(EN1_PIN, EN2_PIN);
+//Encoder encoder(EN1_PIN, EN2_PIN);
 
 void setup() {
 
@@ -179,32 +180,17 @@ void setup() {
   ss.enableEncoderInterrupt();
   ss.setGPIOInterrupts((uint32_t)1 << SS_SWITCH_UP, 1);
 
-  /*
-  while (1) {
-
-    long newPosition = encoder.read();
-    if (newPosition != oldPosition) {
-      oldPosition = newPosition;
-      Serial.println(newPosition);
-    }
-    if (digitalRead(SE_PIN) == LOW) {
-      Serial.println("button press");
-    }
-    delay(100);
-  }
-*/
-
-  MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 30, 3, "Main", FONT_SMALL, FONT_TITLE);
+  MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 3, "Main", FONT_SMALL, FONT_TITLE);
 
   MenuOption1 = MainMenu.addNI("Options");
   MenuOption2 = MainMenu.addNI("Wireless");
   MenuOption3 = MainMenu.addNI("Servos");
 
   MainMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  MainMenu.setTitleBarSize(0, 0, 160, 30);
-  MainMenu.setTitleTextMargins(10, 5);
+  MainMenu.setTitleBarSize(0, 0, 160, 20);
+  MainMenu.setTitleTextMargins(10, 15);
   MainMenu.setMenuBarMargins(0, 160, 2, 1);
-  MainMenu.setItemTextMargins(10, 10, 5);
+  MainMenu.setItemTextMargins(10, 15, 5);
   MainMenu.setItemColors(C_GREY, MENU_SELECTBORDER);
 
   OptionMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
@@ -239,8 +225,9 @@ void setup() {
   WirelessMenu.setMenuBarMargins(0, 160, 2, 1);
   WirelessMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
   WirelessMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+
   ServoMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                 DATA_COLUMN, 15, 6, "Servos", FONT_SMALL, FONT_SMALL);
+                 DATA_COLUMN, 20, 5, "Servos", FONT_SMALL, FONT_SMALL);
   ServoMenu1 = ServoMenu.addNI("Address", 0, 0, 255, 1, 0);
   ServoMenu2 = ServoMenu.addNI("Prec", 2, 0, sizeof(PrecisionItems) / sizeof(PrecisionItems[0]), 1, 0, PrecisionItems);
   ServoMenu3 = ServoMenu.addNI("Tune", 2, 0, sizeof(TuneItems) / sizeof(TuneItems[0]), 1, 0, TuneItems);
@@ -248,10 +235,10 @@ void setup() {
   ServoMenu5 = ServoMenu.addNI("Tune", 2, 0, sizeof(TuneItems) / sizeof(TuneItems[0]), 1, 0, TuneItems);
   ServoMenu6 = ServoMenu.addNI("State", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
 
-  ServoMenu.setTitleBarSize(0, 0, 160, 30);
-  ServoMenu.setTitleTextMargins(10, 5);
-  ServoMenu.setItemTextMargins(10, 5, 2);
-  ServoMenu.setMenuBarMargins(0, 160, 0, 0);
+  ServoMenu.setTitleBarSize(0, 0, 160, 20);
+  ServoMenu.setTitleTextMargins(10, 15);
+  ServoMenu.setItemTextMargins(10, 15, 10);
+  ServoMenu.setMenuBarMargins(0, 160, 2, 1);
   ServoMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
   ServoMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
