@@ -18,10 +18,12 @@ mindmap
         Y motion
         Lidar
         BNO085
+        Gripper Test
     Settings
         X factor
         Y factor
         North - IMU location to location
+        Gripper Strength
     Utilities
         Save Configuration
         Load Configuration

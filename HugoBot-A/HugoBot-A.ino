@@ -348,7 +348,7 @@ void ProcessMainMenu() {
 // meaning you simply use the same MoveUp, MoveDown and the library will know if you are
 // wanting to move the selector or cycle through a range
 
-void                                                      () {
+void ProcessOptionMenu() {
 
   // the entire menu processing are basically 3 calls
   // YourMenu.MoveUp();
