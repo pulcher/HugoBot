@@ -41,8 +41,8 @@
 #include "Adafruit_ST7735.h"
 #include "Adafruit_ST7735_Menu.h"
 #include "Colors.h"
-#include <Adafruit_seesaw.h>
-#include <Encoder.h>
+#include "Adafruit_seesaw.h"
+
 // found in \Arduino\libraries\Adafruit-GFX-Library-master
 #include "fonts\FreeSans9pt7b.h"
 #include "fonts\FreeSans12pt7b.h"
@@ -67,14 +67,7 @@
 #define TFT_MOSI 12  // Data out
 #define TFT_SCLK 13  // Clock out
 
-#define EN1_PIN 4
-#define EN2_PIN 5
-#define SE_PIN 6
-
 // easy way to include fonts but change globally
-// #define FONT_MICRO 1  // font for menus
-// #define FONT_SMALL 2  // font for menus
-// #define FONT_TITLE 3  // font for menus
 #define FONT_SMALL FreeSans9pt7b      // font for menus
 #define FONT_EDITTITLE FreeSans9pt7b  // font for menus
 #define FONT_ITEM FreeSans9pt7b       // font for menus
@@ -107,10 +100,14 @@ int AllowColorMenu = 0;
 
 // must have variables for each menu item
 // best to have these global so you can use them in processing functions
-int MenuOption1 = 0, MenuOption2 = 0, MenuOption3 = 0;
+int MenuOption1 = 0, MenuOption2 = 0, MenuOption3 = 0, MenuOption4 = 0, MenuOption5 = 0;
+int InformationOptions1 = 0, InformationOptions2 = 0, InformationOptions3 = 0, InformationOptions4 = 0, InformationOptions5 = 0;
+int GamesOptions1 = 0, GamesOptions2 = 0, GamesOptions3 = 0;
+int CalibrationOptions1 = 0, CalibrationOptions2 = 0, CalibrationOptions3 = 0, CalibrationOptions4 = 0, CalibrationOptions5 = 0;
+int UtilitiesOptions1 = 0, UtilitiesOptions2 = 0, UtilitiesOptions3 = 0;
+int SettingsOptions1 = 0, SettingsOptions2 = 0, SettingsOptions3 = 0, SettingsOptions4 = 0;
 
 int OptionOption1 = 0, OptionOption2 = 0, OptionOption3 = 0;
-
 int WirelessOption1 = 0, WirelessOption2 = 0, WirelessOption3 = 0, WirelessOption4 = 0;
 int ServoMenu1 = 0, ServoMenu2 = 0, ServoMenu3 = 0, ServoMenu4 = 0, ServoMenu5 = 0, ServoMenu6 = 0;
 
@@ -129,7 +126,6 @@ const char *OffOnItems[] = { "Off", "On" };
 
 const char *DataRateItems[] = { "300b", "1.2kb", "2.4kb", "4.8kb", "9.6kb", "19.2kb", "56kb" };
 
-// you know the drill
 Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
 // fire up the seesaw interface.
@@ -138,22 +134,317 @@ Adafruit_seesaw ss(&Wire1);
 // required, you must create either an Item menu (no inline editing) or an EditMenu (allows inline editing)
 //ClassName YourMenuName(&DisplayObject, True=Touch input, False(Default)=mechanical input);
 ItemMenu MainMenu(&Display);
+EditMenu InformationMenu(&Display);
+EditMenu GamesMenu(&Display);
+EditMenu CalibrationMenu(&Display);
+EditMenu UtilitiesMenu(&Display);
+EditMenu SettingsMenu(&Display);
 
-// since we're showing both menu types, create an object for each where the item menu is the main and calls edit menus
-// you can have an item menu call other item menus an edit menu can call an edit menu but in a round about way--not recommended
-//ClassName YourMenuName(&DisplayObject, True=Touch input, False(Default)=mechanical input);
-EditMenu OptionMenu(&Display);    // default is false, need not specify
-EditMenu WirelessMenu(&Display);  // or you can still call false to force mechanical input selection
-EditMenu ServoMenu(&Display);
+// Menu functions
 
-//Encoder encoder(EN1_PIN, EN2_PIN);
+void ProcessInformationMenu() {
+  int EditInformationOptions = 1;
+
+  Display.fillScreen(MENU_BACKGROUND);
+  InformationMenu.draw();
+
+  while (EditInformationOptions != 0) {
+
+    // standard encoder read
+    Position = ss.getEncoderPosition();
+    delay(DEBOUNCE);
+    
+    if ((Position - oldPosition) > 0) {
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();
+        delay(DEBOUNCE);
+      }
+
+      InformationMenu.MoveUp();
+    }
+
+    if ((Position - oldPosition) < 0) {
+
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();\
+        delay(DEBOUNCE);
+      }
+
+      InformationMenu.MoveDown();
+    }
+
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
+        delay(DEBOUNCE);
+      }
+
+      EditInformationOptions = InformationMenu.selectRow();
+    }
+  }
+}
+
+void ProcessGamesMenu() {
+  int EditGamesOption = 1;
+
+  Display.fillScreen(MENU_BACKGROUND);
+  GamesMenu.draw();
+
+  while (EditGamesOption != 0) {
+
+    // standard encoder read
+    Position = ss.getEncoderPosition();
+    delay(DEBOUNCE);
+    
+    if ((Position - oldPosition) > 0) {
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();
+        delay(DEBOUNCE);
+      }
+
+      GamesMenu.MoveUp();
+    }
+
+    if ((Position - oldPosition) < 0) {
+
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();\
+        delay(DEBOUNCE);
+      }
+
+      GamesMenu.MoveDown();
+    }
+
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
+        delay(DEBOUNCE);
+      }
+
+      EditGamesOption = GamesMenu.selectRow();
+    }
+  }
+}
+
+void ProcessCalibrationMenu() {
+  int EditInformationOptions = 1;
+
+  Display.fillScreen(MENU_BACKGROUND);
+  CalibrationMenu.draw();
+
+  while (EditInformationOptions != 0) {
+
+    // standard encoder read
+    Position = ss.getEncoderPosition();
+    delay(DEBOUNCE);
+    
+    if ((Position - oldPosition) > 0) {
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();
+        delay(DEBOUNCE);
+      }
+
+      CalibrationMenu.MoveUp();
+    }
+
+    if ((Position - oldPosition) < 0) {
+
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();\
+        delay(DEBOUNCE);
+      }
+
+      CalibrationMenu.MoveDown();
+    }
+
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
+        delay(DEBOUNCE);
+      }
+
+      EditInformationOptions = CalibrationMenu.selectRow();
+    }
+  }
+}
+
+void ProcessUtilitiesMenu() {
+
+  int EditInformationOptions = 1;
+
+  Display.fillScreen(MENU_BACKGROUND);
+  UtilitiesMenu.draw();
+
+  while (EditInformationOptions != 0) {
+
+    // standard encoder read
+    Position = ss.getEncoderPosition();
+    delay(DEBOUNCE);
+    
+    if ((Position - oldPosition) > 0) {
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();
+        delay(DEBOUNCE);
+      }
+
+      UtilitiesMenu.MoveUp();
+    }
+
+    if ((Position - oldPosition) < 0) {
+
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();\
+        delay(DEBOUNCE);
+      }
+
+      UtilitiesMenu.MoveDown();
+    }
+
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
+        delay(DEBOUNCE);
+      }
+
+      EditInformationOptions = UtilitiesMenu.selectRow();
+    }
+  }
+}
+
+void ProcessSettingsMenu() {
+  int EditInformationOptions = 1;
+
+  Display.fillScreen(MENU_BACKGROUND);
+  SettingsMenu.draw();
+
+  while (EditInformationOptions != 0) {
+
+    // standard encoder read
+    Position = ss.getEncoderPosition();
+    delay(DEBOUNCE);
+    
+    if ((Position - oldPosition) > 0) {
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();
+        delay(DEBOUNCE);
+      }
+
+      SettingsMenu.MoveUp();
+    }
+
+    if ((Position - oldPosition) < 0) {
+
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();\
+        delay(DEBOUNCE);
+      }
+
+      SettingsMenu.MoveDown();
+    }
+
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
+        delay(DEBOUNCE);
+      }
+
+      EditInformationOptions = SettingsMenu.selectRow();
+    }
+  }
+}
+void ProcessMainMenu() {
+
+  // set an inital flag that will be used to store what menu item the user exited on
+  int MainMenuOption = 1;
+
+  Display.fillScreen(MENU_BACKGROUND);
+  MainMenu.draw();
+
+  // run the processing loop until user move selector to title bar (which becomes exit, i.e. 0 return val)
+  // and selectes it
+  // note menu code can return - 1 for errors so run unitl non zero
+  while (MainMenuOption != 0) {
+
+    //getEncoder(&MainMenu); 
+
+    Position = ss.getEncoderPosition();
+    delay(DEBOUNCE);
+    
+    if ((Position - oldPosition) > 0) {
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();
+        delay(DEBOUNCE);
+      }
+      MainMenu.MoveUp();
+    }
+
+    if ((Position - oldPosition) < 0) {
+
+      while (oldPosition != Position) {
+        oldPosition = Position;
+        Position = ss.getEncoderPosition();
+        delay(DEBOUNCE);
+      }
+
+      MainMenu.MoveDown();
+    }
+
+    // but wait...the user pressed the button on the encoder
+    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
+
+      // debounce the button press
+      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
+        delay(DEBOUNCE);
+      }
+
+      // get the row the selector is on
+      MainMenuOption = MainMenu.selectRow();
+
+      // here is where you process accordingly
+      // remember on pressing button on title bar 0 is returned and will exit the loop
+      if (MainMenuOption == MenuOption1) {
+        ProcessInformationMenu();
+
+        Display.fillScreen(MENU_BACKGROUND);
+        MainMenu.draw();
+      }
+
+      if (MainMenuOption == MenuOption2) {
+        ProcessGamesMenu();
+        Display.fillScreen(MENU_BACKGROUND);
+        MainMenu.draw();
+      }
+
+      if (MainMenuOption == MenuOption3) {
+        ProcessCalibrationMenu();
+        Display.fillScreen(MENU_BACKGROUND);
+        MainMenu.draw();
+      }
+
+      if (MainMenuOption == MenuOption4) {
+        ProcessUtilitiesMenu();
+        Display.fillScreen(MENU_BACKGROUND);
+        MainMenu.draw();
+      }
+
+      if (MainMenuOption == MenuOption5) {
+        ProcessSettingsMenu();
+        Display.fillScreen(MENU_BACKGROUND);
+        MainMenu.draw();
+      }      
+    }
+  }
+}
 
 void setup() {
 
   Serial.begin(115200);
-
-  // button in the encoder
-  pinMode(SE_PIN, INPUT_PULLUP);
 
   // fire up the display
   Display.initR(INITR_GREENTAB);
@@ -180,11 +471,13 @@ void setup() {
   ss.enableEncoderInterrupt();
   ss.setGPIOInterrupts((uint32_t)1 << SS_SWITCH_UP, 1);
 
-  MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 3, "Main", FONT_SMALL, FONT_TITLE);
+  MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 5, "Main", FONT_SMALL, FONT_TITLE);
 
-  MenuOption1 = MainMenu.addNI("Options");
-  MenuOption2 = MainMenu.addNI("Wireless");
-  MenuOption3 = MainMenu.addNI("Servos");
+  MenuOption1 = MainMenu.addNI("Information");
+  MenuOption2 = MainMenu.addNI("Games");
+  MenuOption3 = MainMenu.addNI("Calibration");
+  MenuOption4 = MainMenu.addNI("Utilities");
+  MenuOption5 = MainMenu.addNI("Settings");
 
   MainMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
   MainMenu.setTitleBarSize(0, 0, 160, 20);
@@ -193,54 +486,83 @@ void setup() {
   MainMenu.setItemTextMargins(10, 15, 5);
   MainMenu.setItemColors(C_GREY, MENU_SELECTBORDER);
 
-  OptionMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                  DATA_COLUMN, 30, 3, "Options", FONT_SMALL, FONT_TITLE);
-
   int addNI(const char *ItemText, float Data, float LowLimit, float HighLimit,
             float Increment, byte DecimalPlaces = 0, const char **ItemMenuText = NULL);
 
-  OptionOption1 = OptionMenu.add565("Temp.", Temp2Adj, -1.0, 1.0, .05, 2, NULL);
-  OptionOption2 = OptionMenu.add565("Read", 2, 0, sizeof(ReadoutItems) / sizeof(ReadoutItems[0]), 1, 0, ReadoutItems);
-  OptionOption3 = OptionMenu.add565("Tune", 0, 0, 20, 1, 0, NULL);
+  InformationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Information", FONT_SMALL, FONT_SMALL);
 
-  OptionMenu.SetItemValue(OptionOption1, 0.12);
-  OptionMenu.SetItemValue(OptionOption3, 1);
-  OptionMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  OptionMenu.setTitleBarSize(0, 0, 160, 30);
-  OptionMenu.setTitleTextMargins(10, 5);
-  OptionMenu.setItemTextMargins(10, 10, 5);
-  OptionMenu.setMenuBarMargins(0, 160, 2, 1);
-  OptionMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  InformationOptions1 = InformationMenu.addNI("F-Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  InformationOptions2 = InformationMenu.addNI("Compass", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  InformationOptions3 = InformationMenu.addNI("Location", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  InformationOptions4 = InformationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  InformationOptions5 = InformationMenu.addNI("Battery", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
 
-  WirelessMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                    DATA_COLUMN, 30, 3, "Wireless Menu", FONT_SMALL, FONT_TITLE);
-  WirelessOption1 = WirelessMenu.addNI("Address", 0, 0, 255, 1, 0);
-  WirelessOption2 = WirelessMenu.addNI("Data", 2, 0, sizeof(DataRateItems) / sizeof(DataRateItems[0]), 1, 0, DataRateItems);
-  WirelessOption3 = WirelessMenu.addNI("Air", 2, 0, sizeof(DataRateItems) / sizeof(DataRateItems[0]), 1, 0, DataRateItems);
-  WirelessOption4 = WirelessMenu.addNI("Error", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  InformationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  InformationMenu.setTitleBarSize(0, 0, 160, 20);
+  InformationMenu.setTitleTextMargins(5, 15);
+  InformationMenu.setMenuBarMargins(0, 160, 2, 1);
+  InformationMenu.setItemTextMargins(5, 15, 0);
+  InformationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);            
 
-  WirelessMenu.setTitleBarSize(0, 0, 160, 30);
-  WirelessMenu.setTitleTextMargins(10, 5);
-  WirelessMenu.setItemTextMargins(10, 10, 5);
-  WirelessMenu.setMenuBarMargins(0, 160, 2, 1);
-  WirelessMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  WirelessMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  GamesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Games", FONT_SMALL, FONT_SMALL);
 
-  ServoMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                 DATA_COLUMN, 20, 5, "Servos", FONT_SMALL, FONT_SMALL);
-  ServoMenu1 = ServoMenu.addNI("Address", 0, 0, 255, 1, 0);
-  ServoMenu2 = ServoMenu.addNI("Prec", 2, 0, sizeof(PrecisionItems) / sizeof(PrecisionItems[0]), 1, 0, PrecisionItems);
-  ServoMenu3 = ServoMenu.addNI("Tune", 2, 0, sizeof(TuneItems) / sizeof(TuneItems[0]), 1, 0, TuneItems);
-  ServoMenu4 = ServoMenu.addNI("State", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  ServoMenu5 = ServoMenu.addNI("Tune", 2, 0, sizeof(TuneItems) / sizeof(TuneItems[0]), 1, 0, TuneItems);
-  ServoMenu6 = ServoMenu.addNI("State", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  GamesOptions1 = GamesMenu.addNI("Six", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  GamesOptions2 = GamesMenu.addNI("4", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  GamesOptions3 = GamesMenu.addNI("Quick", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
 
-  ServoMenu.setTitleBarSize(0, 0, 160, 20);
-  ServoMenu.setTitleTextMargins(10, 15);
-  ServoMenu.setItemTextMargins(10, 15, 10);
-  ServoMenu.setMenuBarMargins(0, 160, 2, 1);
-  ServoMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  ServoMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  GamesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  GamesMenu.setTitleBarSize(0, 0, 160, 20);
+  GamesMenu.setTitleTextMargins(5, 15);
+  GamesMenu.setMenuBarMargins(0, 160, 2, 1);
+  GamesMenu.setItemTextMargins(5, 15, 0);
+  GamesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+
+  CalibrationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Calibration", FONT_SMALL, FONT_SMALL);
+
+  CalibrationOptions1 = CalibrationMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  CalibrationOptions2 = CalibrationMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  CalibrationOptions3 = CalibrationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  CalibrationOptions4 = CalibrationMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  CalibrationOptions5 = CalibrationMenu.addNI("Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+
+  CalibrationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  CalibrationMenu.setTitleBarSize(0, 0, 160, 20);
+  CalibrationMenu.setTitleTextMargins(5, 15);
+  CalibrationMenu.setMenuBarMargins(0, 160, 2, 1);
+  CalibrationMenu.setItemTextMargins(5, 15, 0);
+  CalibrationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+
+  UtilitiesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Utilities", FONT_SMALL, FONT_SMALL);
+
+  UtilitiesOptions1 = UtilitiesMenu.addNI("Load Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  UtilitiesOptions2 = UtilitiesMenu.addNI("Save Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  UtilitiesOptions3 = UtilitiesMenu.addNI("Reset", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                        
+
+  UtilitiesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  UtilitiesMenu.setTitleBarSize(0, 0, 160, 20);
+  UtilitiesMenu.setTitleTextMargins(5, 15);
+  UtilitiesMenu.setMenuBarMargins(0, 160, 2, 1);
+  UtilitiesMenu.setItemTextMargins(5, 15, 0);
+  UtilitiesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+
+  SettingsMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Settings", FONT_SMALL, FONT_SMALL);
+
+  SettingsOptions1 = SettingsMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  SettingsOptions2 = SettingsMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  SettingsOptions3 = SettingsMenu.addNI("IMU-N", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  SettingsOptions4 = SettingsMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                          
+
+  SettingsMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  SettingsMenu.setTitleBarSize(0, 0, 160, 20);
+  SettingsMenu.setTitleTextMargins(5, 15);
+  SettingsMenu.setMenuBarMargins(0, 160, 2, 1);
+  SettingsMenu.setItemTextMargins(5, 15, 0);
+  SettingsMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
   ProcessMainMenu();
 
@@ -250,258 +572,3 @@ void setup() {
 
 void loop() {
 }
-
-// function to process main menu iteraction
-// ideally this implementation makes it easy to launch your menu from anywhere in th
-void ProcessMainMenu() {
-
-  // set an inital flag that will be used to store what menu item the user exited on
-  int MainMenuOption = 1;
-
-  // blank out the screen
-  Display.fillScreen(MENU_BACKGROUND);
-
-  // draw the main menu
-  MainMenu.draw();
-
-  // run the processing loop until user move selector to title bar (which becomes exit, i.e. 0 return val)
-  // and selectes it
-  // note menu code can return - 1 for errors so run unitl non zero
-
-  while (MainMenuOption != 0) {
-
-    // standard encoder read
-    Position = ss.getEncoderPosition(); //encoder.read();
-    delay(DEBOUNCE);
-    // attempt to debouce these darn things...
-    if ((Position - oldPosition) > 0) {
-
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition(); //encoder.read();
-        delay(DEBOUNCE);
-      }
-
-      // once encoder calms down and is done cycling, move selector up
-      // since encoder reads are increasing
-      // any menu wrapping is handled in the library
-      MainMenu.MoveUp();
-    }
-    // attempt to debouce these darn things...
-    if ((Position - oldPosition) < 0) {
-
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition(); //encoder.read();
-        delay(DEBOUNCE);
-      }
-      // once encoder calms down and is done cycling, move selector up
-      // since encoder reads are decreasing
-      // any menu wrapping is handled in the library
-      MainMenu.MoveDown();
-    }
-
-    // but wait...the user pressed the button on the encoder
-    //if (digitalRead(SE_PIN) == LOW) {
-      if (!ss.digitalRead(SS_SWITCH_SELECT)) {
-
-      // debounce the button press
-      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
-        delay(DEBOUNCE);
-      }
-
-      // get the row the selector is on
-      MainMenuOption = MainMenu.selectRow();
-
-      // here is where you process accordingly
-      // remember on pressing button on title bar 0 is returned and will exit the loop
-
-      if (MainMenuOption == MenuOption1) {
-        // item 1 was the Option menu
-        ProcessOptionMenu();
-        // when done processing that menu, return here
-        // clear display and redraw this main menu
-        Display.fillScreen(MENU_BACKGROUND);
-        MainMenu.draw();
-      }
-
-      if (MainMenuOption == MenuOption2) {
-        ProcessWirelessMenu();
-        Display.fillScreen(MENU_BACKGROUND);
-        MainMenu.draw();
-      }
-
-      if (MainMenuOption == MenuOption3) {
-        ProcessServoMenu();
-        Display.fillScreen(MENU_BACKGROUND);
-        MainMenu.draw();
-      }
-    }
-  }
-
-  // at this point MenuOption better be 0...
-}
-
-// menu to handle processing for a sub-menu
-// since this menu will be a menu that allows edits (EditMenu object type)
-// process is exactly the same as an ItemMenu
-// meaning you simply use the same MoveUp, MoveDown and the library will know if you are
-// wanting to move the selector or cycle through a range
-
-void ProcessOptionMenu() {
-
-  // the entire menu processing are basically 3 calls
-  // YourMenu.MoveUp();
-  // YourMenu.MoveDown();
-  // EditMenuOption = YourMenu.selectRow();
-
-  // set an inital flag that will be used to store what menu item the user exited on
-  int EditMenuOption = 1;
-
-  // blank out the screen
-  Display.fillScreen(MENU_BACKGROUND);
-
-  // draw the main menu
-  OptionMenu.draw();
-
-  // run the processing loop until user move selector to title bar (which becomes exit)
-  // and selectes it
-  while (EditMenuOption != 0) {
-
-    // standard encoder read
-    Position = ss.getEncoderPosition(); // encoder.read();
-    delay(DEBOUNCE);
-    // attempt to debouce these darn things...
-    if ((Position - oldPosition) > 0) {
-
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();// encoder.read();
-        delay(DEBOUNCE);
-      }
-
-      OptionMenu.MoveUp();
-    }
-
-    if ((Position - oldPosition) < 0) {
-
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();// encoder.read();
-        delay(DEBOUNCE);
-      }
-
-      OptionMenu.MoveDown();
-    }
-
-    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
-
-      // debounce the selector button
-      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
-        delay(DEBOUNCE);
-      }
-      // use the selectRow to
-      // 1. select a row for editing
-      // a. when a row is selected, moveup, movedown will then scroll through the editable values (values or a list)
-      // 2. unselect a row when editing is done
-      // 3. when selector is on the title bar annd selecRow is called a 0 is returned
-
-      EditMenuOption = OptionMenu.selectRow();
-    }
-  }
-}
-
-
-void ProcessWirelessMenu() {
-
-  int EditMenuOption = 1;
-
-  Display.fillScreen(MENU_BACKGROUND);
-
-  WirelessMenu.draw();
-
-  while (EditMenuOption != 0) {
-
-    Position = ss.getEncoderPosition(); //encoder.read();
-
-
-    if ((Position - oldPosition) > 0) {
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition(); // encoder.read();
-        delay(DEBOUNCE);
-      }
-
-
-      WirelessMenu.MoveUp();
-    }
-
-    if ((Position - oldPosition) < 0) {
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition(); //encoder.read();
-        delay(DEBOUNCE);
-      }
-
-      WirelessMenu.MoveDown();
-    }
-
-    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
-
-      // debounce the selector button
-      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
-        delay(DEBOUNCE);
-      }
-
-      EditMenuOption = WirelessMenu.selectRow();
-    }
-  }
-}
-
-void ProcessServoMenu() {
-
-  int EditMenuOption = 1;
-
-  Display.fillScreen(MENU_BACKGROUND);
-
-  ServoMenu.draw();
-
-  while (EditMenuOption != 0) {
-
-    Position = ss.getEncoderPosition(); // encoder.read();
-    delay(DEBOUNCE);
-    if ((Position - oldPosition) > 0) {
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition(); // encoder.read();
-        delay(DEBOUNCE);
-      }
-      ServoMenu.MoveUp();
-    }
-
-    if ((Position - oldPosition) < 0) {
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition(); // encoder.read();
-        delay(DEBOUNCE);
-      }
-      ServoMenu.MoveDown();
-    }
-
-    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
-
-      // debounce the selector button
-      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
-        delay(DEBOUNCE);
-      }
-
-      EditMenuOption = ServoMenu.selectRow();
-    }
-  }
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// end of example
-//////////////////////////////////////////////////////////////////////////////////////////////////
