@@ -42,6 +42,7 @@
 #include "Adafruit_ST7735_Menu.h"
 #include "Colors.h"
 #include "Adafruit_seesaw.h"
+#include <ST7735_t3.h>
 
 // found in \Arduino\libraries\Adafruit-GFX-Library-master
 #include "fonts\FreeSans9pt7b.h"
@@ -64,7 +65,8 @@
 #define TFT_DC 8
 #define TFT_CS 10
 #define TFT_RST 9
-#define TFT_MOSI 12  // Data out
+#define TFT_MOSI 11  // Data out
+#define TFT_MOSO 12
 #define TFT_SCLK 13  // Clock out
 
 // easy way to include fonts but change globally
@@ -126,7 +128,9 @@ const char *OffOnItems[] = { "Off", "On" };
 
 const char *DataRateItems[] = { "300b", "1.2kb", "2.4kb", "4.8kb", "9.6kb", "19.2kb", "56kb" };
 
-Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+// Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+// ST7735_t3 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 
 // fire up the seesaw interface.
 Adafruit_seesaw ss(&Wire1);
@@ -362,6 +366,7 @@ void ProcessMainMenu() {
   // set an inital flag that will be used to store what menu item the user exited on
   int MainMenuOption = 1;
 
+  Serial.println("in processing menu... set background");
   Display.fillScreen(MENU_BACKGROUND);
   MainMenu.draw();
 
@@ -374,13 +379,15 @@ void ProcessMainMenu() {
 
     Position = ss.getEncoderPosition();
     delay(DEBOUNCE);
-    
+    // Serial.print("Encoder position: ");
+    // Serial.println(Position);
     if ((Position - oldPosition) > 0) {
       while (oldPosition != Position) {
         oldPosition = Position;
         Position = ss.getEncoderPosition();
         delay(DEBOUNCE);
       }
+      
       MainMenu.MoveUp();
     }
 
@@ -448,7 +455,7 @@ void setup() {
 
   // fire up the display
   Display.initR(INITR_GREENTAB);
-  Display.setRotation(3);
+  Display.setRotation(1);
 
   // Initialize the SeeSaw
   if(!ss.begin(SEESAW_ADDR)) {
@@ -469,8 +476,10 @@ void setup() {
 
   Serial.println("Turning on interrupts");
   ss.enableEncoderInterrupt();
+  Serial.println("Turning on GPIO interrupts");
   ss.setGPIOInterrupts((uint32_t)1 << SS_SWITCH_UP, 1);
 
+  Serial.println("initializing main menu");
   MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 5, "Main", FONT_SMALL, FONT_TITLE);
 
   MenuOption1 = MainMenu.addNI("Information");
@@ -564,6 +573,7 @@ void setup() {
   SettingsMenu.setItemTextMargins(5, 15, 0);
   SettingsMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
+  Serial.println("ProcessingMainMenu");
   ProcessMainMenu();
 
   // menu code done, now proceed to your code
