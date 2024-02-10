@@ -647,9 +647,9 @@ void DisplayLidar() {
   //Poll sensor for new data
   if (centerLidar.isDataReady() == true)
   {
-    File dataFile = SD.open("lidar.txt", FILE_WRITE);
+    // File dataFile = SD.open("lidar.txt", FILE_WRITE);
     
-    dataFile.println("**********************************************************************");
+    // dataFile.println("**********************************************************************");
     Serial.println("**********************************************************************");
 
     if (centerLidar.getRangingData(&measurementData)) //Read distance data into array
@@ -661,18 +661,18 @@ void DisplayLidar() {
         for (int x = imageWidth - 1 ; x >= 0 ; x--)
         {
           Serial.print("\t");
-          dataFile.print("\t");
+          // dataFile.print("\t");
           Serial.print(measurementData.distance_mm[x + y]);
-          dataFile.print(measurementData.distance_mm[x + y]);
+          // dataFile.print(measurementData.distance_mm[x + y]);
         }
         Serial.println();
-        dataFile.println();
+        // dataFile.println();
       }
       Serial.println();
-      dataFile.println();
+      // dataFile.println();
     }
 
-    dataFile.close();
+    // dataFile.close();
   }
 }
 
