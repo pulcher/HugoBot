@@ -42,7 +42,9 @@
 #include "Adafruit_ST7735_Menu.h"
 #include "Colors.h"
 #include "Adafruit_seesaw.h"
-#include <ST7735_t3.h>
+#include <SparkFun_VL53L5CX_Library.h>
+#include <SD.h>
+#include <SPI.h>
 
 // found in \Arduino\libraries\Adafruit-GFX-Library-master
 #include "fonts\FreeSans9pt7b.h"
@@ -118,6 +120,10 @@ float Temp1Adj = 0.2, Temp2Adj = -.3, AlarmVal = 1;
 // encoder stuff
 long Position = 0, oldPosition = 0;
 
+// Lidar Sensor stuff
+int imageResolution = 0; //Used to pretty print output
+int imageWidth = 0; //Used to pretty print output
+
 // create some selectable menu sub-items, these are lists inside a menu item
 const char *ReadoutItems[] = { "Abs.", "Deg F", "Deg C" };
 const char *RefreshItems[] = { "Off", "1 s", "2 s", "10 s",
@@ -129,8 +135,11 @@ const char *OffOnItems[] = { "Off", "On" };
 const char *DataRateItems[] = { "300b", "1.2kb", "2.4kb", "4.8kb", "9.6kb", "19.2kb", "56kb" };
 
 Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-// Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
-// ST7735_t3 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
+SparkFun_VL53L5CX centerLidar;
+VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
+
+// SD card stuff
+const int chipSelect = BUILTIN_SDCARD;
 
 // fire up the seesaw interface.
 Adafruit_seesaw ss(&Wire1);
@@ -449,9 +458,63 @@ void ProcessMainMenu() {
   }
 }
 
+void Setup8x8Sensor() {
+    Serial.print("Initializing SD card...");
+
+  // see if the card is present and can be initialized:
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+    while (1) {
+      // No SD card, so don't do anything more - stay stuck here
+    }
+  }
+  Serial.println("card initialized.");
+
+  Serial.println("SparkFun VL53L5CX Driver");
+
+  Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
+  if (centerLidar.begin() == false)
+  {
+    Serial.println(F("centerLidar Sensor not found - check your wiring. Freezing"));
+    while (1) ;
+  }
+
+  centerLidar.setResolution(8 * 8);
+
+  imageResolution = centerLidar.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
+  imageWidth = sqrt(imageResolution); //Calculate printing width
+
+  bool response = centerLidar.setRangingFrequency(10);
+  if (response == true)
+  {
+    int frequency = centerLidar.getRangingFrequency();
+    if (frequency > 0)
+    {
+      Serial.print("Ranging frequency set to ");
+      Serial.print(frequency);
+      Serial.println(" Hz.");
+    }
+    else
+      Serial.println(F("Error recovering ranging frequency."));
+  }
+  else
+  {
+    Serial.println(F("Cannot set ranging frequency requested. Freezing..."));
+    while (1) ;
+  }
+
+  centerLidar.startRanging();
+}
+
 void setup() {
 
   Serial.begin(115200);
+
+  Wire.begin(); //This resets I2C bus to 100kHz
+  Wire.setClock(1000000); //Sensor has max I2C freq of 1MHz
+
+  // fire up the VL53L5CX 8x8 Time of Flight (ToF) Array Sensor
+  Setup8x8Sensor();
 
   // fire up the display
   Display.initR(INITR_GREENTAB);
@@ -580,5 +643,42 @@ void setup() {
   Display.fillScreen(MENU_BACKGROUND);
 }
 
+void DisplayLidar() {
+  //Poll sensor for new data
+  if (centerLidar.isDataReady() == true)
+  {
+    // File dataFile = SD.open("lidar.txt", FILE_WRITE);
+    
+    // dataFile.println("**********************************************************************");
+    Serial.println("**********************************************************************");
+
+    if (centerLidar.getRangingData(&measurementData)) //Read distance data into array
+    {
+      //The ST library returns the data transposed from zone mapping shown in datasheet
+      //Pretty-print data with increasing y, decreasing x to reflect reality
+      for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
+      {
+        for (int x = imageWidth - 1 ; x >= 0 ; x--)
+        {
+          Serial.print("\t");
+          // dataFile.print("\t");
+          Serial.print(measurementData.distance_mm[x + y]);
+          // dataFile.print(measurementData.distance_mm[x + y]);
+        }
+        Serial.println();
+        // dataFile.println();
+      }
+      Serial.println();
+      // dataFile.println();
+    }
+
+    // dataFile.close();
+  }
+}
+
 void loop() {
+  
+  DisplayLidar();
+
+  delay(5);
 }
