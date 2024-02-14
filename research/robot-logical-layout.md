@@ -8,7 +8,6 @@ mindmap
     I2C1
       Center 8x8 Lidar
       ANO seesaw encoder
-      Center 8x8 sensor
     I2C2
       Outside 8x8 sensor
     SPI
