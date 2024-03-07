@@ -44,6 +44,7 @@
 #include "Colors.h"
 #include "Adafruit_seesaw.h"
 #include <SparkFun_VL53L5CX_Library.h>
+#include "Optical_Flow_Sensor.h"
 #include <SD.h>
 #include <SPI.h>
 
@@ -148,6 +149,7 @@ SparkFun_VL53L5CX centerLidar;
 VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
 
 Adafruit_BNO08x bno08x(BNO08X_RESET);
+Optical_Flow_Sensor flow(10, PAA5100);
 
 // SD card stuff
 const int chipSelect = BUILTIN_SDCARD;
@@ -561,6 +563,14 @@ void setReports(void) {
   }
 }
 
+void SetupOpticalFlowSensor()
+{
+    if (!flow.begin()) {
+    Serial.println("Initialization of the flow sensor failed");
+    while(1) { }
+  }
+}
+
 void printActivity(uint8_t activity_id) {
   switch (activity_id) {
   case PAC_UNKNOWN:
@@ -611,6 +621,9 @@ void setup() {
 
   // fire up the BNO085 IMU
   SetupImuSensor();
+
+  // fire up the PAA5100JE-O
+  SetupOpticalFlowSensor();
 
   // fire up the display
   Display.initR(INITR_GREENTAB);
@@ -953,11 +966,26 @@ void DisplayImu () {
   }
 }
 
+void DisplayOpticalFlow () {
+  int16_t deltaX, deltaY;
+
+  // Get motion count since last call
+  flow.readMotionCount(&deltaX, &deltaY);
+
+  Serial.print("X: ");
+  Serial.print(deltaX);
+  Serial.print(", Y: ");
+  Serial.print(deltaY);
+  Serial.print("\n");
+}
+
 void loop() {
   
-  // DisplayLidar();
+  DisplayLidar();
 
-  DisplayImu();
+  // DisplayImu();
+
+  //DisplayOpticalFlow();
 
   delay(5);
 }
