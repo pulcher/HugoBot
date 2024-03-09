@@ -2,6 +2,7 @@
 #include "MeMegaPi.h"
 #include "Arduino.h"
 #include "SoftwareSerial.h"
+// #include "Servo.h"
 
 #define NUM_MOTORS 4
 #define MOTOR_LF 0
@@ -57,6 +58,8 @@ MeMegaPiDCMotor motor1(PORT1B);
 MeMegaPiDCMotor motor2(PORT2A);
 MeMegaPiDCMotor motor3(PORT2B);
 
+Servo clawServo;
+
 MeMegaPiDCMotor motors[] = {motor0, motor1, motor2, motor3};
 
 int8_t motors_pwm[NUM_MOTORS];
@@ -69,6 +72,9 @@ void setup() {
   for(int i = 0; i < NUM_MOTORS; i++ ) {
     motors_pwm[i] = motors_pwm_previous[i] = 0;
   }
+
+  clawServo.attach(60);
+  clawServo.writeMicroseconds(1100);
 
 }
 
@@ -174,11 +180,19 @@ void loop() {
     buttonPressed = true;
   }
 
-  // if (MePS2.ButtonPressed(MeJOYSTICK_BUTTON_R))
-  // {
-  //   Serial.println("BUTTON_R is pressed!");
-  // }
+  if (MePS2.ButtonPressed(MeJOYSTICK_BUTTON_R))
+  {
+    Serial.println("BUTTON_R is pressed!");
+    clawOpen();
+  }
   
+  if (MePS2.ButtonPressed(MeJOYSTICK_BUTTON_L))
+  {
+    Serial.println("BUTTON_L is pressed!");
+    clawClosed();
+  }
+
+
   handleJoystick(MeJOYSTICK_RX, MeJOYSTICK_RY);
 
   if (!buttonPressed) {
@@ -243,3 +257,16 @@ void setWheelSpeed(int8_t motorIdx, int16_t speed) {
   motors[motorIdx].run(speed);
 }
 
+void clawOpen() {
+  setClaw(1300);
+}
+
+void clawClosed() {
+  setClaw(2000);
+}
+
+void setClaw(uint16_t pwmSetting) {
+  clawServo.writeMicroseconds(pwmSetting);
+
+  delay(10);
+}
