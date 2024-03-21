@@ -201,6 +201,8 @@ void loop() {
   
   //handleMotors();
 
+  // read the serial in for json that looks like
+  // TheHugoDahl: Like this(ish): {"operation": "move", "direction": "N", "timeMS": 150}
   buttonPressed = false;
 }
 
