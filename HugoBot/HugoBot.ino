@@ -2,7 +2,7 @@
 #include "MeMegaPi.h"
 #include "Arduino.h"
 #include "SoftwareSerial.h"
-// #include "Servo.h"
+#include <ArduinoJson.h>
 
 #define NUM_MOTORS 4
 #define MOTOR_LF 0
@@ -67,6 +67,7 @@ int8_t motors_pwm_previous[NUM_MOTORS];
 
 void setup() {
   Serial.begin(115200);
+  Serial2.begin(9600);
   MePS2.begin(115200);
 
   for(int i = 0; i < NUM_MOTORS; i++ ) {
@@ -74,13 +75,23 @@ void setup() {
   }
 
   clawServo.attach(60);
-  clawServo.writeMicroseconds(1100);
+  clawServo.writeMicroseconds(1200);
 
 }
 
 bool buttonPressed = false;
+StaticJsonDocument<200> doc;
 
 void loop() {
+  
+  if (Serial2.available()) {
+    String received_data = Serial2.readStringUntil('\n');  // Read data from Serial2
+    DeserializationError error = deserializeJson(doc, received_data);
+    long jTime = doc["time"];
+    Serial.println("Received message from Arduino 1: " + received_data + " at " + jTime);
+  
+  }
+
   MePS2.loop();
   
   if (MePS2.ButtonPressed(MeJOYSTICK_UP))
@@ -222,6 +233,7 @@ void handleJoystick(uint8_t x, uint8_t y) {
     Serial.println(radianAngle);
   }
   
+  delay(100);
 }
 
 void handleMotors() {
@@ -239,15 +251,15 @@ void handleMotors() {
 
 void moveBot(uint8_t botDirection, uint16_t speed) {
   auto direction = Directions[botDirection];
-  Serial.print("botDirection: ");
-  Serial.print(botDirection);
-  Serial.print(", ");
-  Serial.print("direction[WHEELS_FRONT][WHEELS_LEFT]: ");
-  Serial.print(direction[WHEELS_FRONT][WHEELS_LEFT]);
-  Serial.print(", ");
-  Serial.print("All_Wheels[WHEELS_FRONT][WHEELS_LEFT]: ");
-  Serial.print(All_Wheels[WHEELS_FRONT][WHEELS_LEFT]);
-  Serial.println("");
+  // Serial.print("botDirection: ");
+  // Serial.print(botDirection);
+  // Serial.print(", ");
+  // Serial.print("direction[WHEELS_FRONT][WHEELS_LEFT]: ");
+  // Serial.print(direction[WHEELS_FRONT][WHEELS_LEFT]);
+  // Serial.print(", ");
+  // Serial.print("All_Wheels[WHEELS_FRONT][WHEELS_LEFT]: ");
+  // Serial.print(All_Wheels[WHEELS_FRONT][WHEELS_LEFT]);
+  // Serial.println("");
 
   setWheelSpeed(MOTOR_LF, direction[WHEELS_FRONT][WHEELS_LEFT]  * All_Wheels[WHEELS_FRONT][WHEELS_LEFT]  * speed);
   setWheelSpeed(MOTOR_RF, direction[WHEELS_FRONT][WHEELS_RIGHT] * All_Wheels[WHEELS_FRONT][WHEELS_RIGHT] * speed);

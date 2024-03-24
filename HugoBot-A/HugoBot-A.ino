@@ -1,39 +1,6 @@
 /*
+  HugoBot
 
-  example in how to implement the menu library for and ESP32 and Adafruit libraries. This is an example that
-  uses both menu types
-  1) a simple selection menu (ItemMenu) where the user can scroll up/down and select
-  an item and some action be performed such as drawing a screen or activating a sub menu
-  2) an menu with in-line where the user can scroll up/down the list and select an item
-  however the difference is that move/up down on a selected item will scroll the values of that
-  menu item and NOT scroll the list, selecing a selected item will restor control to moving up/down
-  3) a EditMenu menu with in-line an no icons (down and dirty)
-
-  highlights
-  1. menu items exceeds screen size but library handles wrapping
-  2. each item selection has a range, increment and decimal readout
-  3. items can also be read from a char array
-
-
-  ESP32     display
-  3v3         VCC
-  GND         GND
-  5           TFT_CS
-  25          TFT_RESET
-  2           TFT_DC
-  23          MOSI
-  18          SCK
-  3v3         LED
-  19          MISO
-  3v3         BL
-  
-  ESP32         Encoder
-  32            select button 1
-  GND           select button 2
-  27            encoder direction 1
-  33            encoder direction 2
-  GND           encoder dir ground
-  
 */
 
 // required libraries
@@ -47,6 +14,7 @@
 #include "Optical_Flow_Sensor.h"
 #include <SD.h>
 #include <SPI.h>
+#include <ArduinoJson.h>
 
 // found in \Arduino\libraries\Adafruit-GFX-Library-master
 #include "fonts\FreeSans9pt7b.h"
@@ -521,8 +489,6 @@ void Setup8x8Sensor() {
 
 void SetupImuSensor() {
  if (!bno08x.begin_I2C(0x4a, &Wire1, 0)) {
-    // if (!bno08x.begin_UART(&Serial1)) {  // Requires a device with > 300 byte
-    // UART buffer! if (!bno08x.begin_SPI(BNO08X_CS, BNO08X_INT)) {
     Serial.println("Failed to find BNO08x chip");
     while (1) {
       delay(10);
@@ -569,6 +535,23 @@ void SetupOpticalFlowSensor()
     Serial.println("Initialization of the flow sensor failed");
     while(1) { }
   }
+}
+
+StaticJsonDocument<200> doc;
+
+void SetupSerial1ToMegaPi() {
+  Serial8.begin(9600, SERIAL_8N1);
+
+  // Add values in the document
+  doc["sensor"] = "gps";
+  //doc["time"] = 1351824120;
+
+  // Add an array.
+  //JsonArray data = doc.createNestedArray("data");
+  //data.add(48.756080);
+  //data.add(2.302038);
+
+  Serial.println("Setup8ToMegaPi executed.");
 }
 
 void printActivity(uint8_t activity_id) {
@@ -624,6 +607,9 @@ void setup() {
 
   // fire up the PAA5100JE-O
   SetupOpticalFlowSensor();
+
+  // fire up Serial1 connectivity to MegaPi
+  SetupSerial1ToMegaPi();
 
   // fire up the display
   Display.initR(INITR_GREENTAB);
@@ -750,6 +736,14 @@ void setup() {
 
   // menu code done, now proceed to your code
   Display.fillScreen(MENU_BACKGROUND);
+}
+
+void DoSerial8Stuff() {
+  serializeJson(doc, Serial8);
+  Serial8.println();
+
+  serializeJson(doc, Serial);
+  Serial.println();
 }
 
 void DisplayLidar() {
@@ -981,11 +975,13 @@ void DisplayOpticalFlow () {
 
 void loop() {
   
-  DisplayLidar();
+  // DisplayLidar();
 
   // DisplayImu();
 
-  //DisplayOpticalFlow();
+  // DisplayOpticalFlow();
 
-  delay(5);
+  DoSerial8Stuff();
+
+  delay(500);
 }
