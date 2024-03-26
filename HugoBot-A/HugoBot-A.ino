@@ -15,6 +15,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <ArduinoJson.h>
+#include "directions.h"
 
 // found in \Arduino\libraries\Adafruit-GFX-Library-master
 #include "fonts\FreeSans9pt7b.h"
@@ -537,14 +538,12 @@ void SetupOpticalFlowSensor()
   }
 }
 
-StaticJsonDocument<200> doc;
-
 void SetupSerial1ToMegaPi() {
   Serial8.begin(9600, SERIAL_8N1);
 
   // Add values in the document
-  doc["sensor"] = "gps";
-  //doc["time"] = 1351824120;
+  // doc["sensor"] = "gps";
+  // doc["time"] = 1351824120;
 
   // Add an array.
   //JsonArray data = doc.createNestedArray("data");
@@ -739,8 +738,55 @@ void setup() {
 }
 
 void DoSerial8Stuff() {
+
+// sample
+// {
+//   "operation": "move",
+//   "data": {
+//     "direction": "NW",
+//     "speed": "50",
+//     "timeMS": 500
+//   }
+// }
+
+  JsonDocument doc;
+
+  doc.clear();
+  // go forward at full speed 
+  doc["operation"] = "move";
+
+  JsonObject dataDoc = doc["data"].to<JsonObject>();
+  dataDoc["direction"] = DIRECTION_F;
+  dataDoc["speed"] = 100;
+  dataDoc["timeMS"] = 1000;
+  
   serializeJson(doc, Serial8);
   Serial8.println();
+
+  // wait for 2 seconds
+  delay(2000);
+
+  // stop
+  doc.clear();
+  // go forward at full speed 
+  doc["operation"] = "move";
+
+  dataDoc = doc["data"].to<JsonObject>();
+  dataDoc["direction"] = DIRECTION_NONE;
+  dataDoc["speed"] = 0;
+  dataDoc["timeMS"] = 1;
+
+  serializeJson(doc, Serial8);
+  Serial8.println();
+  // go reverse at full speed
+
+  // wait for 2 seconds
+
+  // stop
+
+
+  // serializeJson(doc, Serial8);
+  // Serial8.println();
 
   serializeJson(doc, Serial);
   Serial.println();
