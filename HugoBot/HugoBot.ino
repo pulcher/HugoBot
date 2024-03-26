@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "SoftwareSerial.h"
 #include <ArduinoJson.h>
+#include "directions.h"
 
 #define NUM_MOTORS 4
 #define MOTOR_LF 0
@@ -15,30 +16,11 @@
 #define REVERSE  (int8_t)-1
 #define STOP               0
 
-// The 9 (including stopped) the bot can move, from the attributions 
-// (https://github.com/pulcher/HugoBot/blob/main/research/attributions.md)
-// page
-#define DIRECTION_NW    0
-#define DIRECTION_N     1
-#define DIRECTION_NE    2
-#define DIRECTION_W     3
-#define DIRECTION_NONE  4
-#define DIRECTION_E     5
-#define DIRECTION_SW    6
-#define DIRECTION_S     7
-#define DIRECTION_SE    8
-
-// rotation is a littl different
-#define DIRECTION_ROTL  9
-#define DIRECTION_ROTN  10
-#define DIRECTION_ROTR  11
-
 #define WHEELS_FRONT 0    // Lookup index for the FRONT wheels, in the "directions" array
 #define WHEELS_REAR  1    // Lookup index for the REAR wheels, in the "directions" array
 
-
 #define WHEELS_LEFT  0    // Lookup index for the LEFT wheel in the inner "directions" array
-#define WHEELS_RIGHT 1    // Lookup index for the READ wheel in the inner "directions" array
+#define WHEELS_RIGHT 1    // Lookup index for the REAR wheel in the inner "directions" array
 
 const int8_t Front_Wheels[]    = {1, REVERSE};
 const int8_t Rear_Wheels[]     = {1, REVERSE};
@@ -80,14 +62,14 @@ void setup() {
 }
 
 bool buttonPressed = false;
-StaticJsonDocument<200> doc;
+JsonDocument doc;
 
 void loop() {
   
   if (Serial2.available()) {
     String received_data = Serial2.readStringUntil('\n');  // Read data from Serial2
     DeserializationError error = deserializeJson(doc, received_data);
-    long jTime = doc["time"];
+    long jTime = doc["data"]["timeMS"];
     Serial.println("Received message from Arduino 1: " + received_data + " at " + jTime);
   
   }
@@ -98,7 +80,7 @@ void loop() {
   {
     Serial.println("UP is pressed!");
 
-    moveBot(DIRECTION_N, 100);
+    moveBot(DIRECTION_F, 100);
     buttonPressed = true;
   }
 
@@ -106,7 +88,7 @@ void loop() {
   {
     Serial.println("DOWN is pressed!");
 
-    moveBot(DIRECTION_S, 100);
+    moveBot(DIRECTION_RR, 100);
     buttonPressed = true;
   }
 
@@ -114,7 +96,7 @@ void loop() {
   {
     Serial.println("LEFT is pressed!");
         
-    moveBot(DIRECTION_W, 100);
+    moveBot(DIRECTION_SL, 100);
     buttonPressed = true;
   }
 
@@ -122,7 +104,7 @@ void loop() {
   {
     Serial.println("RIGHT is pressed!");
 
-    moveBot(DIRECTION_E, 100);
+    moveBot(DIRECTION_SR, 100);
     buttonPressed = true;
   }
 
@@ -163,7 +145,7 @@ void loop() {
   {
     Serial.println("BUTTON_L1 is pressed!");
 
-    moveBot(DIRECTION_NW, 100);
+    moveBot(DIRECTION_FL, 100);
     buttonPressed = true;
   }
 
@@ -171,7 +153,7 @@ void loop() {
   {
     Serial.println("BUTTON_L2 is pressed!");
 
-    moveBot(DIRECTION_SW, 100);
+    moveBot(DIRECTION_RL, 100);
     buttonPressed = true;
   }
 
@@ -179,7 +161,7 @@ void loop() {
   {
     Serial.println("BUTTON_R1 is pressed!");
 
-    moveBot(DIRECTION_NE, 100);
+    moveBot(DIRECTION_FR, 100);
     buttonPressed = true;
   }
 
@@ -187,7 +169,7 @@ void loop() {
   {
     Serial.println("BUTTON_R2 is pressed!");
 
-    moveBot(DIRECTION_SE, 100);
+    moveBot(DIRECTION_RR, 100);
     buttonPressed = true;
   }
 
@@ -209,8 +191,6 @@ void loop() {
   if (!buttonPressed) {
     moveBot(DIRECTION_NONE, 0);
   }
-  
-  //handleMotors();
 
   // read the serial in for json that looks like
   // TheHugoDahl: Like this(ish): {"operation": "move", "direction": "N", "timeMS": 150}
@@ -234,19 +214,6 @@ void handleJoystick(uint8_t x, uint8_t y) {
   }
   
   delay(100);
-}
-
-void handleMotors() {
-  // for(int i = 0; i < NUM_MOTORS; i++) {
-  //   if (motors_pwm[i] != motors_pwm_previous[i]) {
-  //     motors_pwm_previous[i] = motors_pwm[i];
-  //   }
-  // }
-
-  // motor0.run(motors_pwm[0]);
-  // motor1.run(motors_pwm[1]);
-  // motor2.run(motors_pwm[2]);
-  // motor3.run(motors_pwm[3]);
 }
 
 void moveBot(uint8_t botDirection, uint16_t speed) {
