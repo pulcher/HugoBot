@@ -763,6 +763,8 @@ void DoSerial8Stuff() {
   serializeJson(doc, Serial8);
   Serial8.println();
 
+  serializeJson(doc, Serial);
+  Serial.println();
   // wait for 2 seconds
   delay(2000);
 
@@ -778,9 +780,23 @@ void DoSerial8Stuff() {
 
   serializeJson(doc, Serial8);
   Serial8.println();
-  // go reverse at full speed
 
+  // go reverse at full speed
+  doc.clear();
+  doc["operation"] = "move";
+
+  dataDoc = doc["data"].to<JsonObject>();
+  dataDoc["direction"] = DIRECTION_R;
+  dataDoc["speed"] = 100;
+  dataDoc["timeMS"] = 1000;
+  
+  serializeJson(doc, Serial8);
+  Serial8.println();
+
+  serializeJson(doc, Serial);
+  Serial.println();
   // wait for 2 seconds
+  delay(2000);
 
   // stop
 
@@ -788,8 +804,8 @@ void DoSerial8Stuff() {
   // serializeJson(doc, Serial8);
   // Serial8.println();
 
-  serializeJson(doc, Serial);
-  Serial.println();
+  // serializeJson(doc, Serial);
+  // Serial.println();
 }
 
 void DisplayLidar() {

@@ -7,9 +7,9 @@
 
 #define NUM_MOTORS 4
 #define MOTOR_LF 0
-#define MOTOR_RF 2
+#define MOTOR_RF 1
 #define MOTOR_RR 3
-#define MOTOR_LR 1
+#define MOTOR_LR 2
 
 // Multipliers for direction "correction"
 #define FORWARD            1
@@ -22,9 +22,9 @@
 #define WHEELS_LEFT  0    // Lookup index for the LEFT wheel in the inner "directions" array
 #define WHEELS_RIGHT 1    // Lookup index for the REAR wheel in the inner "directions" array
 
-const int8_t Front_Wheels[]    = {1, REVERSE};
-const int8_t Rear_Wheels[]     = {1, REVERSE};
-const int8_t All_Wheels[][2]   = {{REVERSE, 1}, {REVERSE, 1}};
+const int8_t Front_Wheels[]    = {FORWARD, REVERSE};
+const int8_t Rear_Wheels[]     = {FORWARD, REVERSE};
+const int8_t All_Wheels[][2]   = {{REVERSE, FORWARD}, {REVERSE, FORWARD}};
 
 const int8_t Directions [12][2][2] = {
                                     { {STOP, FORWARD},     {FORWARD, STOP}},       {{FORWARD, FORWARD},  {FORWARD, FORWARD}},    {{FORWARD, STOP}, {STOP, FORWARD}       },
@@ -66,13 +66,7 @@ JsonDocument doc;
 
 void loop() {
   
-  if (Serial2.available()) {
-    String received_data = Serial2.readStringUntil('\n');  // Read data from Serial2
-    DeserializationError error = deserializeJson(doc, received_data);
-    long jTime = doc["data"]["timeMS"];
-    Serial.println("Received message from Arduino 1: " + received_data + " at " + jTime);
-  
-  }
+  handleSerial2();
 
   MePS2.loop();
   
@@ -88,7 +82,7 @@ void loop() {
   {
     Serial.println("DOWN is pressed!");
 
-    moveBot(DIRECTION_RR, 100);
+    moveBot(DIRECTION_R, 100);
     buttonPressed = true;
   }
 
@@ -189,7 +183,7 @@ void loop() {
   handleJoystick(MeJOYSTICK_RX, MeJOYSTICK_RY);
 
   if (!buttonPressed) {
-    moveBot(DIRECTION_NONE, 0);
+    // moveBot(DIRECTION_NONE, 0);
   }
 
   // read the serial in for json that looks like
@@ -216,17 +210,35 @@ void handleJoystick(uint8_t x, uint8_t y) {
   delay(100);
 }
 
+void handleSerial2() {
+  if (Serial2.available()) {
+    String received_data = Serial2.readStringUntil('\n');  // Read data from Serial2
+    DeserializationError error = deserializeJson(doc, received_data);
+    String operation = doc["operation"];
+    Serial.println("Received: operation: " + operation);
+
+    if (operation == "move") {
+      uint8_t direction = doc["data"]["direction"];
+      uint8_t speed = doc["data"]["speed"];
+
+      moveBot(direction, speed);
+    }
+  }
+
+
+}
+
 void moveBot(uint8_t botDirection, uint16_t speed) {
   auto direction = Directions[botDirection];
-  // Serial.print("botDirection: ");
-  // Serial.print(botDirection);
-  // Serial.print(", ");
-  // Serial.print("direction[WHEELS_FRONT][WHEELS_LEFT]: ");
-  // Serial.print(direction[WHEELS_FRONT][WHEELS_LEFT]);
-  // Serial.print(", ");
-  // Serial.print("All_Wheels[WHEELS_FRONT][WHEELS_LEFT]: ");
-  // Serial.print(All_Wheels[WHEELS_FRONT][WHEELS_LEFT]);
-  // Serial.println("");
+  Serial.print("botDirection: ");
+  Serial.print(botDirection);
+  Serial.print(", ");
+  Serial.print("direction[WHEELS_FRONT][WHEELS_LEFT]: ");
+  Serial.print(direction[WHEELS_FRONT][WHEELS_LEFT]);
+  Serial.print(", ");
+  Serial.print("All_Wheels[WHEELS_FRONT][WHEELS_LEFT]: ");
+  Serial.print(All_Wheels[WHEELS_FRONT][WHEELS_LEFT]);
+  Serial.println("");
 
   setWheelSpeed(MOTOR_LF, direction[WHEELS_FRONT][WHEELS_LEFT]  * All_Wheels[WHEELS_FRONT][WHEELS_LEFT]  * speed);
   setWheelSpeed(MOTOR_RF, direction[WHEELS_FRONT][WHEELS_RIGHT] * All_Wheels[WHEELS_FRONT][WHEELS_RIGHT] * speed);
