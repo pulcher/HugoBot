@@ -62,11 +62,14 @@ void setup() {
 }
 
 bool buttonPressed = false;
+bool isAutonomous = false;
 JsonDocument doc;
 
 void loop() {
   
-  handleSerial2();
+  if (isAutonomous) {
+    handleSerial2();
+  }
 
   MePS2.loop();
   
@@ -130,10 +133,11 @@ void loop() {
   //   Serial.println("START is pressed!");
   // }
 
-  // if (MePS2.ButtonPressed(MeJOYSTICK_SELECT))
-  // {
-  //   Serial.println("SELECT is pressed!");
-  // }
+  if (MePS2.ButtonPressed(MeJOYSTICK_SELECT))
+  {
+    isAutonomous = !isAutonomous;
+    delay(100);
+  }
 
   if (MePS2.ButtonPressed(MeJOYSTICK_L1))
   {
@@ -182,8 +186,8 @@ void loop() {
 
   handleJoystick(MeJOYSTICK_RX, MeJOYSTICK_RY);
 
-  if (!buttonPressed) {
-    // moveBot(DIRECTION_NONE, 0);
+  if (!buttonPressed && !isAutonomous) {
+    moveBot(DIRECTION_NONE, 0);
   }
 
   // read the serial in for json that looks like
