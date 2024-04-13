@@ -6,10 +6,7 @@
   License: MIT. See license file for more information but you can
   basically do whatever you want with this code.
 
-  This example shows how to read the interrupt from the VL53L5CX.
-
-  The INT pin is active low, output, by default. For this example you'll need to solder
-  a wire from the INT pin to pin 4 (or any interrupt capable pin) on your microcontroller
+  This example shows how to read all 64 distance readings at once.
 
   Feel like supporting our work? Buy a board from SparkFun!
   https://www.sparkfun.com/products/18642
@@ -26,46 +23,35 @@ VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes 
 int imageResolution = 0; //Used to pretty print output
 int imageWidth = 0; //Used to pretty print output
 
-#define INT_PIN PIN_A0 //Connect VL53L5CX INT pin to pin 4 on your microcontroller
-volatile bool dataReady = false; //Goes true when interrupt fires
-
 void setup()
 {
   Serial.begin(115200);
   delay(1000);
   Serial.println("SparkFun VL53L5CX Imager Example");
 
-  Wire1.begin(); //This resets I2C bus to 100kHz
-  Wire1.setClock(1000000); //Sensor has max I2C freq of 1MHz
-
+  Wire1.begin(); //This resets to 100kHz I2C
+  Wire1.setClock(400000); //Sensor has max I2C freq of 400kHz 
+  
   Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
-  if (myImager.begin(0x29 , Wire1) == false)
+  if (myImager.begin(0x29, Wire1) == false)
   {
     Serial.println(F("Sensor not found - check your wiring. Freezing"));
     while (1) ;
   }
-
-  myImager.setResolution(8 * 8); //Enable all 64 pads
-
+  
+  myImager.setResolution(8*8); //Enable all 64 pads
+  
   imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
   imageWidth = sqrt(imageResolution); //Calculate printing width
-
-  myImager.setRangingFrequency(15);
-
-  // Attach the interrupt
-  attachInterrupt(digitalPinToInterrupt(INT_PIN), interruptRoutine, FALLING);
-  Serial.println(F("Interrupt pin configured."));
 
   myImager.startRanging();
 }
 
 void loop()
 {
-  //ISR will let us know when new data is ready
-  if (dataReady == true)
+  //Poll sensor for new data
+  if (myImager.isDataReady() == true)
   {
-    dataReady = false;
-
     if (myImager.getRangingData(&measurementData)) //Read distance data into array
     {
       //The ST library returns the data transposed from zone mapping shown in datasheet
@@ -84,10 +70,4 @@ void loop()
   }
 
   delay(5); //Small delay between polling
-}
-
-void interruptRoutine()
-{
-  // Just set the flag that we have updated data and return from the ISR
-  dataReady = true;
 }

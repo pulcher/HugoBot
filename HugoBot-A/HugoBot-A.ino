@@ -446,9 +446,9 @@ void Setup8x8Sensor() {
   // see if the card is present and can be initialized:
   if (!SD.begin(chipSelect)) {
     Serial.println("Card failed, or not present");
-    while (1) {
-      // No SD card, so don't do anything more - stay stuck here
-    }
+    // while (1) {
+    //   // No SD card, so don't do anything more - stay stuck here
+    // }
   }
   Serial.println("card initialized.");
 
@@ -458,7 +458,7 @@ void Setup8x8Sensor() {
   if (centerLidar.begin() == false)
   {
     Serial.println(F("centerLidar Sensor not found - check your wiring. Freezing"));
-    while (1) ;
+   // while (1) ;
   }
 
   centerLidar.setResolution(8 * 8);
@@ -482,7 +482,7 @@ void Setup8x8Sensor() {
   else
   {
     Serial.println(F("Cannot set ranging frequency requested. Freezing..."));
-    while (1) ;
+//    while (1) ;
   }
 
   centerLidar.startRanging();
@@ -491,9 +491,9 @@ void Setup8x8Sensor() {
 void SetupImuSensor() {
  if (!bno08x.begin_I2C(0x4a, &Wire1, 0)) {
     Serial.println("Failed to find BNO08x chip");
-    while (1) {
-      delay(10);
-    }
+    // while (1) {
+    //   delay(10);
+    // }
   }
   Serial.println("BNO08x Found!");
 
@@ -534,7 +534,7 @@ void SetupOpticalFlowSensor()
 {
     if (!flow.begin()) {
     Serial.println("Initialization of the flow sensor failed");
-    while(1) { }
+    // while(1) { }
   }
 }
 
