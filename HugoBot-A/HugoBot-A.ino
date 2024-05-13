@@ -459,8 +459,8 @@ void Setup8x8Sensor() {
   {
     Serial.println(F("centerLidar Sensor not found - check your wiring. Freezing"));
    // while (1) ;
-  }
-
+  } else {
+                
   centerLidar.setResolution(8 * 8);
 
   imageResolution = centerLidar.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
@@ -486,6 +486,7 @@ void Setup8x8Sensor() {
   }
 
   centerLidar.startRanging();
+  }
 }
 
 void SetupImuSensor() {
@@ -590,151 +591,160 @@ void printActivity(uint8_t activity_id) {
   Serial.print(")");
 }
 
+void DiagMessage()
+
+void SetupDiagnosticDisplay() {
+  Display.initR(INITR_BLACKTAB);
+  Display.fillScreen(ST77XX_BLACK);
+}
 
 void setup() {
 
   Serial.begin(115200);
+  Serial.println("Starting setup....");
+
+  SetupDiagnosticDisplay();
 
   Wire.begin(); //This resets I2C bus to 100kHz
   Wire.setClock(1000000); //Sensor has max I2C freq of 1MHz
 
-  // fire up the VL53L5CX 8x8 Time of Flight (ToF) Array Sensor
-  Setup8x8Sensor();
+  // // fire up the VL53L5CX 8x8 Time of Flight (ToF) Array Sensor
+  // // Setup8x8Sensor();
 
-  // fire up the BNO085 IMU
-  SetupImuSensor();
+  // // fire up the BNO085 IMU
+  // // SetupImuSensor();
 
-  // fire up the PAA5100JE-O
-  SetupOpticalFlowSensor();
+  // // fire up the PAA5100JE-O
+  // //SetupOpticalFlowSensor();
 
-  // fire up Serial1 connectivity to MegaPi
-  SetupSerial1ToMegaPi();
+  // // fire up Serial1 connectivity to MegaPi
+  // //SetupSerial1ToMegaPi();
 
-  // fire up the display
-  Display.initR(INITR_GREENTAB);
-  Display.setRotation(1);
+  // // fire up the display
+  // Display.initR(INITR_GREENTAB);
+  // Display.setRotation(1);
 
-  // Initialize the SeeSaw
-  if(!ss.begin(SEESAW_ADDR)) {
-    Serial.println(F("Unable to find SeeSaw"));
-    while(1);
-  }
+  // // Initialize the SeeSaw
+  // if(!ss.begin(SEESAW_ADDR)) {
+  //   Serial.println(F("Unable to find SeeSaw"));
+  //   while(1);
+  // }
 
-  Serial.println("Found Product 5740");
+  // Serial.println("Found Product 5740");
 
-  ss.pinMode(SS_SWITCH_UP, INPUT_PULLUP);
-  ss.pinMode(SS_SWITCH_DOWN, INPUT_PULLUP);
-  ss.pinMode(SS_SWITCH_LEFT, INPUT_PULLUP);
-  ss.pinMode(SS_SWITCH_RIGHT, INPUT_PULLUP);
-  ss.pinMode(SS_SWITCH_SELECT, INPUT_PULLUP);
+  // ss.pinMode(SS_SWITCH_UP, INPUT_PULLUP);
+  // ss.pinMode(SS_SWITCH_DOWN, INPUT_PULLUP);
+  // ss.pinMode(SS_SWITCH_LEFT, INPUT_PULLUP);
+  // ss.pinMode(SS_SWITCH_RIGHT, INPUT_PULLUP);
+  // ss.pinMode(SS_SWITCH_SELECT, INPUT_PULLUP);
 
-  // get starting position
-  Position = ss.getEncoderPosition();
+  // // get starting position
+  // Position = ss.getEncoderPosition();
 
-  Serial.println("Turning on interrupts");
-  ss.enableEncoderInterrupt();
-  Serial.println("Turning on GPIO interrupts");
-  ss.setGPIOInterrupts((uint32_t)1 << SS_SWITCH_UP, 1);
+  // Serial.println("Turning on interrupts");
+  // ss.enableEncoderInterrupt();
+  // Serial.println("Turning on GPIO interrupts");
+  // ss.setGPIOInterrupts((uint32_t)1 << SS_SWITCH_UP, 1);
 
-  Serial.println("initializing main menu");
-  MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 5, "Main", FONT_SMALL, FONT_TITLE);
+  // Serial.println("initializing main menu");
+  // MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 5, "Main", FONT_SMALL, FONT_TITLE);
 
-  MenuOption1 = MainMenu.addNI("Information");
-  MenuOption2 = MainMenu.addNI("Games");
-  MenuOption3 = MainMenu.addNI("Calibration");
-  MenuOption4 = MainMenu.addNI("Utilities");
-  MenuOption5 = MainMenu.addNI("Settings");
+  // MenuOption1 = MainMenu.addNI("Information");
+  // MenuOption2 = MainMenu.addNI("Games");
+  // MenuOption3 = MainMenu.addNI("Calibration");
+  // MenuOption4 = MainMenu.addNI("Utilities");
+  // MenuOption5 = MainMenu.addNI("Settings");
 
-  MainMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  MainMenu.setTitleBarSize(0, 0, 160, 20);
-  MainMenu.setTitleTextMargins(10, 15);
-  MainMenu.setMenuBarMargins(0, 160, 2, 1);
-  MainMenu.setItemTextMargins(10, 15, 5);
-  MainMenu.setItemColors(C_GREY, MENU_SELECTBORDER);
+  // MainMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  // MainMenu.setTitleBarSize(0, 0, 160, 20);
+  // MainMenu.setTitleTextMargins(10, 15);
+  // MainMenu.setMenuBarMargins(0, 160, 2, 1);
+  // MainMenu.setItemTextMargins(10, 15, 5);
+  // MainMenu.setItemColors(C_GREY, MENU_SELECTBORDER);
 
-  int addNI(const char *ItemText, float Data, float LowLimit, float HighLimit,
-            float Increment, byte DecimalPlaces = 0, const char **ItemMenuText = NULL);
+  // int addNI(const char *ItemText, float Data, float LowLimit, float HighLimit,
+  //           float Increment, byte DecimalPlaces = 0, const char **ItemMenuText = NULL);
 
-  InformationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                DATA_COLUMN, 20, 5, "Information", FONT_SMALL, FONT_SMALL);
+  // InformationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+  //               DATA_COLUMN, 20, 5, "Information", FONT_SMALL, FONT_SMALL);
 
-  InformationOptions1 = InformationMenu.addNI("F-Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  InformationOptions2 = InformationMenu.addNI("Compass", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  InformationOptions3 = InformationMenu.addNI("Location", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  InformationOptions4 = InformationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  InformationOptions5 = InformationMenu.addNI("Battery", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  // InformationOptions1 = InformationMenu.addNI("F-Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  // InformationOptions2 = InformationMenu.addNI("Compass", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  // InformationOptions3 = InformationMenu.addNI("Location", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  // InformationOptions4 = InformationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  // InformationOptions5 = InformationMenu.addNI("Battery", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
 
-  InformationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  InformationMenu.setTitleBarSize(0, 0, 160, 20);
-  InformationMenu.setTitleTextMargins(5, 15);
-  InformationMenu.setMenuBarMargins(0, 160, 2, 1);
-  InformationMenu.setItemTextMargins(5, 15, 0);
-  InformationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);            
+  // InformationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  // InformationMenu.setTitleBarSize(0, 0, 160, 20);
+  // InformationMenu.setTitleTextMargins(5, 15);
+  // InformationMenu.setMenuBarMargins(0, 160, 2, 1);
+  // InformationMenu.setItemTextMargins(5, 15, 0);
+  // InformationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);            
 
-  GamesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                DATA_COLUMN, 20, 5, "Games", FONT_SMALL, FONT_SMALL);
+  // GamesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+  //               DATA_COLUMN, 20, 5, "Games", FONT_SMALL, FONT_SMALL);
 
-  GamesOptions1 = GamesMenu.addNI("Six", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  GamesOptions2 = GamesMenu.addNI("4", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  GamesOptions3 = GamesMenu.addNI("Quick", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  // GamesOptions1 = GamesMenu.addNI("Six", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  // GamesOptions2 = GamesMenu.addNI("4", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  // GamesOptions3 = GamesMenu.addNI("Quick", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
 
-  GamesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  GamesMenu.setTitleBarSize(0, 0, 160, 20);
-  GamesMenu.setTitleTextMargins(5, 15);
-  GamesMenu.setMenuBarMargins(0, 160, 2, 1);
-  GamesMenu.setItemTextMargins(5, 15, 0);
-  GamesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  // GamesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  // GamesMenu.setTitleBarSize(0, 0, 160, 20);
+  // GamesMenu.setTitleTextMargins(5, 15);
+  // GamesMenu.setMenuBarMargins(0, 160, 2, 1);
+  // GamesMenu.setItemTextMargins(5, 15, 0);
+  // GamesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
-  CalibrationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                DATA_COLUMN, 20, 5, "Calibration", FONT_SMALL, FONT_SMALL);
+  // CalibrationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+  //               DATA_COLUMN, 20, 5, "Calibration", FONT_SMALL, FONT_SMALL);
 
-  CalibrationOptions1 = CalibrationMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  CalibrationOptions2 = CalibrationMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  CalibrationOptions3 = CalibrationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  CalibrationOptions4 = CalibrationMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  CalibrationOptions5 = CalibrationMenu.addNI("Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  // CalibrationOptions1 = CalibrationMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  // CalibrationOptions2 = CalibrationMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  // CalibrationOptions3 = CalibrationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  // CalibrationOptions4 = CalibrationMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  // CalibrationOptions5 = CalibrationMenu.addNI("Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
 
-  CalibrationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  CalibrationMenu.setTitleBarSize(0, 0, 160, 20);
-  CalibrationMenu.setTitleTextMargins(5, 15);
-  CalibrationMenu.setMenuBarMargins(0, 160, 2, 1);
-  CalibrationMenu.setItemTextMargins(5, 15, 0);
-  CalibrationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  // CalibrationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  // CalibrationMenu.setTitleBarSize(0, 0, 160, 20);
+  // CalibrationMenu.setTitleTextMargins(5, 15);
+  // CalibrationMenu.setMenuBarMargins(0, 160, 2, 1);
+  // CalibrationMenu.setItemTextMargins(5, 15, 0);
+  // CalibrationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
-  UtilitiesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                DATA_COLUMN, 20, 5, "Utilities", FONT_SMALL, FONT_SMALL);
+  // UtilitiesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+  //               DATA_COLUMN, 20, 5, "Utilities", FONT_SMALL, FONT_SMALL);
 
-  UtilitiesOptions1 = UtilitiesMenu.addNI("Load Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  UtilitiesOptions2 = UtilitiesMenu.addNI("Save Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  UtilitiesOptions3 = UtilitiesMenu.addNI("Reset", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                        
+  // UtilitiesOptions1 = UtilitiesMenu.addNI("Load Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  // UtilitiesOptions2 = UtilitiesMenu.addNI("Save Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  // UtilitiesOptions3 = UtilitiesMenu.addNI("Reset", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                        
 
-  UtilitiesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  UtilitiesMenu.setTitleBarSize(0, 0, 160, 20);
-  UtilitiesMenu.setTitleTextMargins(5, 15);
-  UtilitiesMenu.setMenuBarMargins(0, 160, 2, 1);
-  UtilitiesMenu.setItemTextMargins(5, 15, 0);
-  UtilitiesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  // UtilitiesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  // UtilitiesMenu.setTitleBarSize(0, 0, 160, 20);
+  // UtilitiesMenu.setTitleTextMargins(5, 15);
+  // UtilitiesMenu.setMenuBarMargins(0, 160, 2, 1);
+  // UtilitiesMenu.setItemTextMargins(5, 15, 0);
+  // UtilitiesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
-  SettingsMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-                DATA_COLUMN, 20, 5, "Settings", FONT_SMALL, FONT_SMALL);
+  // SettingsMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+  //               DATA_COLUMN, 20, 5, "Settings", FONT_SMALL, FONT_SMALL);
 
-  SettingsOptions1 = SettingsMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  SettingsOptions2 = SettingsMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  SettingsOptions3 = SettingsMenu.addNI("IMU-N", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  SettingsOptions4 = SettingsMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                          
+  // SettingsOptions1 = SettingsMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  // SettingsOptions2 = SettingsMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  // SettingsOptions3 = SettingsMenu.addNI("IMU-N", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  // SettingsOptions4 = SettingsMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                          
 
-  SettingsMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  SettingsMenu.setTitleBarSize(0, 0, 160, 20);
-  SettingsMenu.setTitleTextMargins(5, 15);
-  SettingsMenu.setMenuBarMargins(0, 160, 2, 1);
-  SettingsMenu.setItemTextMargins(5, 15, 0);
-  SettingsMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  // SettingsMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  // SettingsMenu.setTitleBarSize(0, 0, 160, 20);
+  // SettingsMenu.setTitleTextMargins(5, 15);
+  // SettingsMenu.setMenuBarMargins(0, 160, 2, 1);
+  // SettingsMenu.setItemTextMargins(5, 15, 0);
+  // SettingsMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
-  Serial.println("ProcessingMainMenu");
-  ProcessMainMenu();
+  // Serial.println("ProcessingMainMenu");
+  // ProcessMainMenu();
 
-  // menu code done, now proceed to your code
-  Display.fillScreen(MENU_BACKGROUND);
+  // // menu code done, now proceed to your code
+  // Display.fillScreen(MENU_BACKGROUND);
 }
 
 void DoSerial8Stuff() {
@@ -1043,7 +1053,8 @@ void loop() {
 
   // DisplayOpticalFlow();
 
-  DoSerial8Stuff();
+  //DoSerial8Stuff();
 
+  Serial.println("loop....");
   delay(500);
 }
