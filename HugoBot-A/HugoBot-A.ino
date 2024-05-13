@@ -16,6 +16,7 @@
 #include <SPI.h>
 #include <ArduinoJson.h>
 #include "directions.h"
+#include "DiagnosticDisplay.h"
 
 // found in \Arduino\libraries\Adafruit-GFX-Library-master
 #include "fonts\FreeSans9pt7b.h"
@@ -75,6 +76,8 @@
 #define MENU_HIGHBORDER C_DKRED
 
 #define MENU_DISABLE C_GREY
+
+DiagnosticDisplay diag = DiagnosticDisplay();
 
 int MenuOption = 0;
 int AllowColorMenu = 0;
@@ -591,11 +594,11 @@ void printActivity(uint8_t activity_id) {
   Serial.print(")");
 }
 
-void DiagMessage()
-
 void SetupDiagnosticDisplay() {
   Display.initR(INITR_BLACKTAB);
   Display.fillScreen(ST77XX_BLACK);
+
+  diag.log();
 }
 
 void setup() {
