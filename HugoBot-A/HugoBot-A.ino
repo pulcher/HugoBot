@@ -8,7 +8,7 @@
 #include "Adafruit_ST7735.h"
 #include "Adafruit_ST7735_Menu.h"
 #include "Adafruit_BNO08x.h"
-#include "Colors.h"
+// #include "Colors.h"
 #include "Adafruit_seesaw.h"
 #include <SparkFun_VL53L5CX_Library.h>
 #include "Optical_Flow_Sensor.h"
@@ -18,22 +18,24 @@
 #include "directions.h"
 #include "DiagnosticDisplay.h"
 
-// found in \Arduino\libraries\Adafruit-GFX-Library-master
-#include "fonts\FreeSans9pt7b.h"
-#include "fonts\FreeSans12pt7b.h"
-#include "fonts\FreeSans18pt7b.h"
-#include "fonts\FreeSansBold9pt7b.h"
-#include "fonts\FreeSansBold12pt7b.h"
-#include "fonts\FreeSansOblique9pt7b.h"
+#include "hugobot-a-menu.h"
 
-#define DATA_COLUMN 85
+// // found in \Arduino\libraries\Adafruit-GFX-Library-master
+// #include "fonts\FreeSans9pt7b.h"
+// #include "fonts\FreeSans12pt7b.h"
+// #include "fonts\FreeSans18pt7b.h"
+// #include "fonts\FreeSansBold9pt7b.h"
+// #include "fonts\FreeSansBold12pt7b.h"
+// #include "fonts\FreeSansOblique9pt7b.h"
 
-#define SEESAW_ADDR      0x49
-#define SS_SWITCH_SELECT 1
-#define SS_SWITCH_UP     2
-#define SS_SWITCH_LEFT   3
-#define SS_SWITCH_DOWN   4
-#define SS_SWITCH_RIGHT  5
+// #define DATA_COLUMN 85
+
+// #define SEESAW_ADDR      0x49
+// #define SS_SWITCH_SELECT 1
+// #define SS_SWITCH_UP     2
+// #define SS_SWITCH_LEFT   3
+// #define SS_SWITCH_DOWN   4
+// #define SS_SWITCH_RIGHT  5
 
 // esp32 pinouts
 #define TFT_DC 8
@@ -49,33 +51,33 @@
 // BNO08x defines
 #define BNO08X_RESET -1
 
-// easy way to include fonts but change globally
-#define FONT_SMALL FreeSans9pt7b      // font for menus
-#define FONT_EDITTITLE FreeSans9pt7b  // font for menus
-#define FONT_ITEM FreeSans9pt7b       // font for menus
-#define FONT_TITLE FreeSans9pt7b      // font for all headings
-#define FONT_SMALL_OB FreeSansOblique9pt7b
+// // easy way to include fonts but change globally
+// #define FONT_SMALL FreeSans9pt7b      // font for menus
+// #define FONT_EDITTITLE FreeSans9pt7b  // font for menus
+// #define FONT_ITEM FreeSans9pt7b       // font for menus
+// #define FONT_TITLE FreeSans9pt7b      // font for all headings
+// #define FONT_SMALL_OB FreeSansOblique9pt7b
 
-#define DEBOUNCE 100
+// #define DEBOUNCE 100
 
-// set default colors
-#define TITLE_TEXT C_WHITE
-#define TITLE_BACK C_DKBLUE
+// // set default colors
+// #define TITLE_TEXT C_WHITE
+// #define TITLE_BACK C_DKBLUE
 
-#define MENU_TEXT C_WHITE
-#define MENU_BACKGROUND C_BLACK
+// #define MENU_TEXT C_WHITE
+// #define MENU_BACKGROUND C_BLACK
 
-// cursor dancing
-#define MENU_SELECTTEXT C_WHITE
-#define MENU_SELECT C_BLUE
-#define MENU_SELECTBORDER C_DKBLUE
+// // cursor dancing
+// #define MENU_SELECTTEXT C_WHITE
+// #define MENU_SELECT C_BLUE
+// #define MENU_SELECTBORDER C_DKBLUE
 
-// if row selected
-#define MENU_HIGHLIGHTTEXT C_WHITE
-#define MENU_HIGHLIGHT C_RED
-#define MENU_HIGHBORDER C_DKRED
+// // if row selected
+// #define MENU_HIGHLIGHTTEXT C_WHITE
+// #define MENU_HIGHLIGHT C_RED
+// #define MENU_HIGHBORDER C_DKRED
 
-#define MENU_DISABLE C_GREY
+// #define MENU_DISABLE C_GREY
 
 int MenuOption = 0;
 int AllowColorMenu = 0;
@@ -127,7 +129,7 @@ Optical_Flow_Sensor flow(10, PAA5100);
 const int chipSelect = BUILTIN_SDCARD;
 
 // fire up the seesaw interface.
-Adafruit_seesaw ss(&Wire1);
+Adafruit_seesaw ss(&Wire);
 
 // required, you must create either an Item menu (no inline editing) or an EditMenu (allows inline editing)
 //ClassName YourMenuName(&DisplayObject, True=Touch input, False(Default)=mechanical input);
@@ -360,7 +362,7 @@ void ProcessMainMenu() {
   // set an inital flag that will be used to store what menu item the user exited on
   int MainMenuOption = 1;
 
-  Serial.println("in processing menu... set background");
+  diag.logln("in processing menu... set background");
   Display.fillScreen(MENU_BACKGROUND);
   MainMenu.draw();
 
@@ -623,128 +625,128 @@ void setup() {
   // // fire up Serial1 connectivity to MegaPi
   // //SetupSerial1ToMegaPi();
 
-  // // fire up the display
-  // Display.initR(INITR_GREENTAB);
-  // Display.setRotation(1);
+  // fire up the display
+  Display.initR(INITR_GREENTAB);
+  Display.setRotation(1);
 
-  // // Initialize the SeeSaw
-  // if(!ss.begin(SEESAW_ADDR)) {
-  //   Serial.println(F("Unable to find SeeSaw"));
-  //   while(1);
-  // }
+  // Initialize the SeeSaw
+  if(!ss.begin(SEESAW_ADDR)) {
+    diag.logln(F("Unable to find SeeSaw"));
+    while(1);
+  }
 
-  // Serial.println("Found Product 5740");
+  diag.logln("Found Product 5740");
 
-  // ss.pinMode(SS_SWITCH_UP, INPUT_PULLUP);
-  // ss.pinMode(SS_SWITCH_DOWN, INPUT_PULLUP);
-  // ss.pinMode(SS_SWITCH_LEFT, INPUT_PULLUP);
-  // ss.pinMode(SS_SWITCH_RIGHT, INPUT_PULLUP);
-  // ss.pinMode(SS_SWITCH_SELECT, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_UP, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_DOWN, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_LEFT, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_RIGHT, INPUT_PULLUP);
+  ss.pinMode(SS_SWITCH_SELECT, INPUT_PULLUP);
 
-  // // get starting position
-  // Position = ss.getEncoderPosition();
+  // get starting position
+  Position = ss.getEncoderPosition();
 
-  // Serial.println("Turning on interrupts");
-  // ss.enableEncoderInterrupt();
-  // Serial.println("Turning on GPIO interrupts");
-  // ss.setGPIOInterrupts((uint32_t)1 << SS_SWITCH_UP, 1);
+  diag.logln("Turning on interrupts");
+  ss.enableEncoderInterrupt();
+  diag.logln("Turning on GPIO interrupts");
+  ss.setGPIOInterrupts((uint32_t)1 << SS_SWITCH_UP, 1);
 
-  // Serial.println("initializing main menu");
-  // MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 5, "Main", FONT_SMALL, FONT_TITLE);
+  diag.logln("initializing main menu");
+  MainMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, 20, 5, "Main", FONT_SMALL, FONT_TITLE);
 
-  // MenuOption1 = MainMenu.addNI("Information");
-  // MenuOption2 = MainMenu.addNI("Games");
-  // MenuOption3 = MainMenu.addNI("Calibration");
-  // MenuOption4 = MainMenu.addNI("Utilities");
-  // MenuOption5 = MainMenu.addNI("Settings");
+  MenuOption1 = MainMenu.addNI("Information");
+  MenuOption2 = MainMenu.addNI("Games");
+  MenuOption3 = MainMenu.addNI("Calibration");
+  MenuOption4 = MainMenu.addNI("Utilities");
+  MenuOption5 = MainMenu.addNI("Settings");
 
-  // MainMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  // MainMenu.setTitleBarSize(0, 0, 160, 20);
-  // MainMenu.setTitleTextMargins(10, 15);
-  // MainMenu.setMenuBarMargins(0, 160, 2, 1);
-  // MainMenu.setItemTextMargins(10, 15, 5);
-  // MainMenu.setItemColors(C_GREY, MENU_SELECTBORDER);
+  MainMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  MainMenu.setTitleBarSize(0, 0, 160, 20);
+  MainMenu.setTitleTextMargins(10, 15);
+  MainMenu.setMenuBarMargins(0, 160, 2, 1);
+  MainMenu.setItemTextMargins(10, 15, 5);
+  MainMenu.setItemColors(C_GREY, MENU_SELECTBORDER);
 
-  // int addNI(const char *ItemText, float Data, float LowLimit, float HighLimit,
-  //           float Increment, byte DecimalPlaces = 0, const char **ItemMenuText = NULL);
+  int addNI(const char *ItemText, float Data, float LowLimit, float HighLimit,
+            float Increment, byte DecimalPlaces = 0, const char **ItemMenuText = NULL);
 
-  // InformationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-  //               DATA_COLUMN, 20, 5, "Information", FONT_SMALL, FONT_SMALL);
+  InformationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Information", FONT_SMALL, FONT_SMALL);
 
-  // InformationOptions1 = InformationMenu.addNI("F-Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  // InformationOptions2 = InformationMenu.addNI("Compass", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  // InformationOptions3 = InformationMenu.addNI("Location", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  // InformationOptions4 = InformationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  // InformationOptions5 = InformationMenu.addNI("Battery", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  InformationOptions1 = InformationMenu.addNI("F-Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  InformationOptions2 = InformationMenu.addNI("Compass", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  InformationOptions3 = InformationMenu.addNI("Location", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  InformationOptions4 = InformationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  InformationOptions5 = InformationMenu.addNI("Battery", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
 
-  // InformationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  // InformationMenu.setTitleBarSize(0, 0, 160, 20);
-  // InformationMenu.setTitleTextMargins(5, 15);
-  // InformationMenu.setMenuBarMargins(0, 160, 2, 1);
-  // InformationMenu.setItemTextMargins(5, 15, 0);
-  // InformationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);            
+  InformationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  InformationMenu.setTitleBarSize(0, 0, 160, 20);
+  InformationMenu.setTitleTextMargins(5, 15);
+  InformationMenu.setMenuBarMargins(0, 160, 2, 1);
+  InformationMenu.setItemTextMargins(5, 15, 0);
+  InformationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);            
 
-  // GamesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-  //               DATA_COLUMN, 20, 5, "Games", FONT_SMALL, FONT_SMALL);
+  GamesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Games", FONT_SMALL, FONT_SMALL);
 
-  // GamesOptions1 = GamesMenu.addNI("Six", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  // GamesOptions2 = GamesMenu.addNI("4", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  // GamesOptions3 = GamesMenu.addNI("Quick", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  GamesOptions1 = GamesMenu.addNI("Six", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  GamesOptions2 = GamesMenu.addNI("4", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  GamesOptions3 = GamesMenu.addNI("Quick", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
 
-  // GamesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  // GamesMenu.setTitleBarSize(0, 0, 160, 20);
-  // GamesMenu.setTitleTextMargins(5, 15);
-  // GamesMenu.setMenuBarMargins(0, 160, 2, 1);
-  // GamesMenu.setItemTextMargins(5, 15, 0);
-  // GamesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  GamesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  GamesMenu.setTitleBarSize(0, 0, 160, 20);
+  GamesMenu.setTitleTextMargins(5, 15);
+  GamesMenu.setMenuBarMargins(0, 160, 2, 1);
+  GamesMenu.setItemTextMargins(5, 15, 0);
+  GamesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
-  // CalibrationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-  //               DATA_COLUMN, 20, 5, "Calibration", FONT_SMALL, FONT_SMALL);
+  CalibrationMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Calibration", FONT_SMALL, FONT_SMALL);
 
-  // CalibrationOptions1 = CalibrationMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  // CalibrationOptions2 = CalibrationMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  // CalibrationOptions3 = CalibrationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  // CalibrationOptions4 = CalibrationMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  // CalibrationOptions5 = CalibrationMenu.addNI("Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  CalibrationOptions1 = CalibrationMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  CalibrationOptions2 = CalibrationMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  CalibrationOptions3 = CalibrationMenu.addNI("IMU", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  CalibrationOptions4 = CalibrationMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  CalibrationOptions5 = CalibrationMenu.addNI("Lidar", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
 
-  // CalibrationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  // CalibrationMenu.setTitleBarSize(0, 0, 160, 20);
-  // CalibrationMenu.setTitleTextMargins(5, 15);
-  // CalibrationMenu.setMenuBarMargins(0, 160, 2, 1);
-  // CalibrationMenu.setItemTextMargins(5, 15, 0);
-  // CalibrationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  CalibrationMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  CalibrationMenu.setTitleBarSize(0, 0, 160, 20);
+  CalibrationMenu.setTitleTextMargins(5, 15);
+  CalibrationMenu.setMenuBarMargins(0, 160, 2, 1);
+  CalibrationMenu.setItemTextMargins(5, 15, 0);
+  CalibrationMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
-  // UtilitiesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-  //               DATA_COLUMN, 20, 5, "Utilities", FONT_SMALL, FONT_SMALL);
+  UtilitiesMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Utilities", FONT_SMALL, FONT_SMALL);
 
-  // UtilitiesOptions1 = UtilitiesMenu.addNI("Load Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  // UtilitiesOptions2 = UtilitiesMenu.addNI("Save Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  // UtilitiesOptions3 = UtilitiesMenu.addNI("Reset", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                        
+  UtilitiesOptions1 = UtilitiesMenu.addNI("Load Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  UtilitiesOptions2 = UtilitiesMenu.addNI("Save Conf", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  UtilitiesOptions3 = UtilitiesMenu.addNI("Reset", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                        
 
-  // UtilitiesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  // UtilitiesMenu.setTitleBarSize(0, 0, 160, 20);
-  // UtilitiesMenu.setTitleTextMargins(5, 15);
-  // UtilitiesMenu.setMenuBarMargins(0, 160, 2, 1);
-  // UtilitiesMenu.setItemTextMargins(5, 15, 0);
-  // UtilitiesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  UtilitiesMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  UtilitiesMenu.setTitleBarSize(0, 0, 160, 20);
+  UtilitiesMenu.setTitleTextMargins(5, 15);
+  UtilitiesMenu.setMenuBarMargins(0, 160, 2, 1);
+  UtilitiesMenu.setItemTextMargins(5, 15, 0);
+  UtilitiesMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
-  // SettingsMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
-  //               DATA_COLUMN, 20, 5, "Settings", FONT_SMALL, FONT_SMALL);
+  SettingsMenu.init(MENU_TEXT, MENU_BACKGROUND, MENU_HIGHLIGHTTEXT, MENU_HIGHLIGHT, MENU_SELECTTEXT, MENU_SELECT,
+                DATA_COLUMN, 20, 5, "Settings", FONT_SMALL, FONT_SMALL);
 
-  // SettingsOptions1 = SettingsMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
-  // SettingsOptions2 = SettingsMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
-  // SettingsOptions3 = SettingsMenu.addNI("IMU-N", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
-  // SettingsOptions4 = SettingsMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                          
+  SettingsOptions1 = SettingsMenu.addNI("X factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);
+  SettingsOptions2 = SettingsMenu.addNI("Y factor", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);  
+  SettingsOptions3 = SettingsMenu.addNI("IMU-N", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);              
+  SettingsOptions4 = SettingsMenu.addNI("Gripper", 1, 0, sizeof(OffOnItems) / sizeof(OffOnItems[0]), 1, 0, OffOnItems);                          
 
-  // SettingsMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
-  // SettingsMenu.setTitleBarSize(0, 0, 160, 20);
-  // SettingsMenu.setTitleTextMargins(5, 15);
-  // SettingsMenu.setMenuBarMargins(0, 160, 2, 1);
-  // SettingsMenu.setItemTextMargins(5, 15, 0);
-  // SettingsMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
+  SettingsMenu.setTitleColors(TITLE_TEXT, TITLE_BACK);
+  SettingsMenu.setTitleBarSize(0, 0, 160, 20);
+  SettingsMenu.setTitleTextMargins(5, 15);
+  SettingsMenu.setMenuBarMargins(0, 160, 2, 1);
+  SettingsMenu.setItemTextMargins(5, 15, 0);
+  SettingsMenu.setItemColors(C_GREY, MENU_SELECTBORDER, MENU_HIGHBORDER);
 
-  // Serial.println("ProcessingMainMenu");
-  // ProcessMainMenu();
+  diag.logln("ProcessingMainMenu");
+  ProcessMainMenu();
 
   // // menu code done, now proceed to your code
   // Display.fillScreen(MENU_BACKGROUND);
