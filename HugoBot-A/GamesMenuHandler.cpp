@@ -6,6 +6,11 @@ GamesMenuHandler::GamesMenuHandler(EditMenu& menu, Adafruit_ST7735& display, Ada
 
 void GamesMenuHandler::Handle() {
   Serial.println("Games menu handling....");
+  Serial.print("intial encoder Position:");
+  Serial.println(ss->getEncoderPosition());
+  
+  Serial.print("EditGamesOption: ");
+  Serial.println(EditGamesOption);
 
   display->fillScreen(MENU_BACKGROUND);
   menu->draw();
@@ -14,6 +19,8 @@ void GamesMenuHandler::Handle() {
 
     // standard encoder read
     Position = ss->getEncoderPosition();
+    Serial.print("Position: ");
+    Serial.println(Position);
     delay(DEBOUNCE);
     
     if ((Position - oldPosition) > 0) {

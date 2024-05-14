@@ -8,7 +8,6 @@
 #include "Adafruit_ST7735.h"
 #include "Adafruit_ST7735_Menu.h"
 #include "Adafruit_BNO08x.h"
-// #include "Colors.h"
 #include "Adafruit_seesaw.h"
 #include <SparkFun_VL53L5CX_Library.h>
 #include "Optical_Flow_Sensor.h"
@@ -17,25 +16,9 @@
 #include <ArduinoJson.h>
 #include "directions.h"
 #include "DiagnosticDisplay.h"
+#include "GamesMenuHandler.h"
 
 #include "hugobot-a-menu.h"
-
-// // found in \Arduino\libraries\Adafruit-GFX-Library-master
-// #include "fonts\FreeSans9pt7b.h"
-// #include "fonts\FreeSans12pt7b.h"
-// #include "fonts\FreeSans18pt7b.h"
-// #include "fonts\FreeSansBold9pt7b.h"
-// #include "fonts\FreeSansBold12pt7b.h"
-// #include "fonts\FreeSansOblique9pt7b.h"
-
-// #define DATA_COLUMN 85
-
-// #define SEESAW_ADDR      0x49
-// #define SS_SWITCH_SELECT 1
-// #define SS_SWITCH_UP     2
-// #define SS_SWITCH_LEFT   3
-// #define SS_SWITCH_DOWN   4
-// #define SS_SWITCH_RIGHT  5
 
 // esp32 pinouts
 #define TFT_DC 8
@@ -50,34 +33,6 @@
 
 // BNO08x defines
 #define BNO08X_RESET -1
-
-// // easy way to include fonts but change globally
-// #define FONT_SMALL FreeSans9pt7b      // font for menus
-// #define FONT_EDITTITLE FreeSans9pt7b  // font for menus
-// #define FONT_ITEM FreeSans9pt7b       // font for menus
-// #define FONT_TITLE FreeSans9pt7b      // font for all headings
-// #define FONT_SMALL_OB FreeSansOblique9pt7b
-
-// #define DEBOUNCE 100
-
-// // set default colors
-// #define TITLE_TEXT C_WHITE
-// #define TITLE_BACK C_DKBLUE
-
-// #define MENU_TEXT C_WHITE
-// #define MENU_BACKGROUND C_BLACK
-
-// // cursor dancing
-// #define MENU_SELECTTEXT C_WHITE
-// #define MENU_SELECT C_BLUE
-// #define MENU_SELECTBORDER C_DKBLUE
-
-// // if row selected
-// #define MENU_HIGHLIGHTTEXT C_WHITE
-// #define MENU_HIGHLIGHT C_RED
-// #define MENU_HIGHBORDER C_DKRED
-
-// #define MENU_DISABLE C_GREY
 
 int MenuOption = 0;
 int AllowColorMenu = 0;
@@ -140,6 +95,8 @@ EditMenu CalibrationMenu(&Display);
 EditMenu UtilitiesMenu(&Display);
 EditMenu SettingsMenu(&Display);
 
+GamesMenuHandler gamesMenuHandler = GamesMenuHandler(GamesMenu, Display, ss);
+
 // Menu functions
 
 void ProcessInformationMenu() {
@@ -185,48 +142,48 @@ void ProcessInformationMenu() {
   }
 }
 
-void ProcessGamesMenu() {
-  int EditGamesOption = 1;
+// void ProcessGamesMenu() {
+//   int EditGamesOption = 1;
 
-  Display.fillScreen(MENU_BACKGROUND);
-  GamesMenu.draw();
+//   Display.fillScreen(MENU_BACKGROUND);
+//   GamesMenu.draw();
 
-  while (EditGamesOption != 0) {
+//   while (EditGamesOption != 0) {
 
-    // standard encoder read
-    Position = ss.getEncoderPosition();
-    delay(DEBOUNCE);
+//     // standard encoder read
+//     Position = ss.getEncoderPosition();
+//     delay(DEBOUNCE);
     
-    if ((Position - oldPosition) > 0) {
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();
-        delay(DEBOUNCE);
-      }
+//     if ((Position - oldPosition) > 0) {
+//       while (oldPosition != Position) {
+//         oldPosition = Position;
+//         Position = ss.getEncoderPosition();
+//         delay(DEBOUNCE);
+//       }
 
-      GamesMenu.MoveUp();
-    }
+//       GamesMenu.MoveUp();
+//     }
 
-    if ((Position - oldPosition) < 0) {
+//     if ((Position - oldPosition) < 0) {
 
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();\
-        delay(DEBOUNCE);
-      }
+//       while (oldPosition != Position) {
+//         oldPosition = Position;
+//         Position = ss.getEncoderPosition();\
+//         delay(DEBOUNCE);
+//       }
 
-      GamesMenu.MoveDown();
-    }
+//       GamesMenu.MoveDown();
+//     }
 
-    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
-      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
-        delay(DEBOUNCE);
-      }
+//     if (!ss.digitalRead(SS_SWITCH_SELECT)) {
+//       while (!ss.digitalRead(SS_SWITCH_SELECT)) {
+//         delay(DEBOUNCE);
+//       }
 
-      EditGamesOption = GamesMenu.selectRow();
-    }
-  }
-}
+//       EditGamesOption = GamesMenu.selectRow();
+//     }
+//   }
+// }
 
 void ProcessCalibrationMenu() {
   int EditInformationOptions = 1;
@@ -419,7 +376,8 @@ void ProcessMainMenu() {
       }
 
       if (MainMenuOption == MenuOption2) {
-        ProcessGamesMenu();
+        //ProcessGamesMenu();
+        gamesMenuHandler.Handle();
         Display.fillScreen(MENU_BACKGROUND);
         MainMenu.draw();
       }
