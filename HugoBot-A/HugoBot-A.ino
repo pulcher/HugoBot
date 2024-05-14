@@ -77,7 +77,7 @@
 
 #define MENU_DISABLE C_GREY
 
-DiagnosticDisplay diag = DiagnosticDisplay();
+DiagnosticDisplay diag = DiagnosticDisplay(Serial);
 
 int MenuOption = 0;
 int AllowColorMenu = 0;

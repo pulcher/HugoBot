@@ -1,10 +1,9 @@
 #include "Arduino.h"
 #include "DiagnosticDisplay.h"
 
-DiagnosticDisplay::DiagnosticDisplay() {
-  _maxLines = 5;
-}
+DiagnosticDisplay::DiagnosticDisplay(usb_serial_class& serial) 
+  : _serial(&serial) {}
 
 void DiagnosticDisplay::log() {
-  Serial.println("*************************************************************************");
+  _serial->println("*************************************************************************");
 }
