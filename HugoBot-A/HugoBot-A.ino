@@ -16,6 +16,7 @@
 #include <SPI.h>
 #include <ArduinoJson.h>
 #include "directions.h"
+#include "DiagnosticDisplay.h"
 
 // found in \Arduino\libraries\Adafruit-GFX-Library-master
 #include "fonts\FreeSans9pt7b.h"
@@ -113,6 +114,8 @@ const char *DataRateItems[] = { "300b", "1.2kb", "2.4kb", "4.8kb", "9.6kb", "19.
 
 // Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 Adafruit_ST7735 Display = Adafruit_ST7735(&SPI1, TFT_CS1, TFT_DC1, TFT_RST1);
+
+DiagnosticDisplay diag = DiagnosticDisplay(Serial, Display);
 
 SparkFun_VL53L5CX centerLidar;
 VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
@@ -591,11 +594,11 @@ void printActivity(uint8_t activity_id) {
   Serial.print(")");
 }
 
-void DiagMessage()
-
 void SetupDiagnosticDisplay() {
   Display.initR(INITR_BLACKTAB);
   Display.fillScreen(ST77XX_BLACK);
+
+  diag.logln("Setting up diagnostic display...");
 }
 
 void setup() {
@@ -1055,6 +1058,6 @@ void loop() {
 
   //DoSerial8Stuff();
 
-  Serial.println("loop....");
+  diag.logln("loop....");
   delay(500);
 }
