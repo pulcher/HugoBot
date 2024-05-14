@@ -377,6 +377,8 @@ void ProcessMainMenu() {
 
       if (MainMenuOption == MenuOption2) {
         //ProcessGamesMenu();
+        diag.log("ss version: ");
+        diag.logln(ss.getVersion());
         gamesMenuHandler.Handle();
         Display.fillScreen(MENU_BACKGROUND);
         MainMenu.draw();

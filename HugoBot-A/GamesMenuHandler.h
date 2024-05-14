@@ -12,10 +12,10 @@ class GamesMenuHandler {
     long Position = 0, oldPosition = 0;
     EditMenu* menu;
     Adafruit_ST7735* display;
-    Adafruit_seesaw* ss;
+    Adafruit_seesaw* encoder;
 
   public:
-    GamesMenuHandler(EditMenu& menu, Adafruit_ST7735& display, Adafruit_seesaw ss);
+    GamesMenuHandler(EditMenu& menu, Adafruit_ST7735& display, Adafruit_seesaw& ss);
     void Handle();
 };
 
