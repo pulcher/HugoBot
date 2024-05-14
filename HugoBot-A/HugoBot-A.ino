@@ -77,8 +77,6 @@
 
 #define MENU_DISABLE C_GREY
 
-DiagnosticDisplay diag = DiagnosticDisplay(Serial);
-
 int MenuOption = 0;
 int AllowColorMenu = 0;
 
@@ -116,6 +114,8 @@ const char *DataRateItems[] = { "300b", "1.2kb", "2.4kb", "4.8kb", "9.6kb", "19.
 
 // Adafruit_ST7735 Display = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 Adafruit_ST7735 Display = Adafruit_ST7735(&SPI1, TFT_CS1, TFT_DC1, TFT_RST1);
+
+DiagnosticDisplay diag = DiagnosticDisplay(Serial, Display);
 
 SparkFun_VL53L5CX centerLidar;
 VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
@@ -598,7 +598,7 @@ void SetupDiagnosticDisplay() {
   Display.initR(INITR_BLACKTAB);
   Display.fillScreen(ST77XX_BLACK);
 
-  diag.log();
+  diag.logln("Setting up diagnostic display...");
 }
 
 void setup() {
@@ -1058,6 +1058,6 @@ void loop() {
 
   //DoSerial8Stuff();
 
-  Serial.println("loop....");
+  diag.logln("loop....");
   delay(500);
 }
