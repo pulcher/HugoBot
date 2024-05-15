@@ -1,6 +1,5 @@
 /*
   HugoBot
-
 */
 
 // required libraries
@@ -18,6 +17,9 @@
 #include "DiagnosticDisplay.h"
 #include "GamesMenuHandler.h"
 #include "InformationMenuHandler.h"
+#include "CalibrationMenuHandler.h"
+#include "UtilitiesMenuHandler.h"
+#include "SettingsMenuHandler.h"
 
 #include "hugobot-a-menu.h"
 
@@ -98,138 +100,12 @@ EditMenu SettingsMenu(&Display);
 
 GamesMenuHandler gamesMenuHandler = GamesMenuHandler(GamesMenu, Display, ss);
 InformationMenuHandler informationMenuHandler = InformationMenuHandler(InformationMenu, Display, ss);
+CalibrationMenuHandler calibrationMenuHandler = CalibrationMenuHandler(CalibrationMenu, Display, ss);
+UtilitiesMenuHandler utilitiesMenuHandler = UtilitiesMenuHandler(UtilitiesMenu, Display, ss);
+SettingsMenuHandler settingsMenuHandler = SettingsMenuHandler(SettingsMenu, Display, ss);
 
 // Menu functions
 
-void ProcessCalibrationMenu() {
-  int EditInformationOptions = 1;
-
-  Display.fillScreen(MENU_BACKGROUND);
-  CalibrationMenu.draw();
-
-  while (EditInformationOptions != 0) {
-
-    // standard encoder read
-    Position = ss.getEncoderPosition();
-    delay(DEBOUNCE);
-    
-    if ((Position - oldPosition) > 0) {
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();
-        delay(DEBOUNCE);
-      }
-
-      CalibrationMenu.MoveUp();
-    }
-
-    if ((Position - oldPosition) < 0) {
-
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();\
-        delay(DEBOUNCE);
-      }
-
-      CalibrationMenu.MoveDown();
-    }
-
-    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
-      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
-        delay(DEBOUNCE);
-      }
-
-      EditInformationOptions = CalibrationMenu.selectRow();
-    }
-  }
-}
-
-void ProcessUtilitiesMenu() {
-
-  int EditInformationOptions = 1;
-
-  Display.fillScreen(MENU_BACKGROUND);
-  UtilitiesMenu.draw();
-
-  while (EditInformationOptions != 0) {
-
-    // standard encoder read
-    Position = ss.getEncoderPosition();
-    delay(DEBOUNCE);
-    
-    if ((Position - oldPosition) > 0) {
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();
-        delay(DEBOUNCE);
-      }
-
-      UtilitiesMenu.MoveUp();
-    }
-
-    if ((Position - oldPosition) < 0) {
-
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();\
-        delay(DEBOUNCE);
-      }
-
-      UtilitiesMenu.MoveDown();
-    }
-
-    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
-      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
-        delay(DEBOUNCE);
-      }
-
-      EditInformationOptions = UtilitiesMenu.selectRow();
-    }
-  }
-}
-
-void ProcessSettingsMenu() {
-  int EditInformationOptions = 1;
-
-  Display.fillScreen(MENU_BACKGROUND);
-  SettingsMenu.draw();
-
-  while (EditInformationOptions != 0) {
-
-    // standard encoder read
-    Position = ss.getEncoderPosition();
-    delay(DEBOUNCE);
-    
-    if ((Position - oldPosition) > 0) {
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();
-        delay(DEBOUNCE);
-      }
-
-      SettingsMenu.MoveUp();
-    }
-
-    if ((Position - oldPosition) < 0) {
-
-      while (oldPosition != Position) {
-        oldPosition = Position;
-        Position = ss.getEncoderPosition();\
-        delay(DEBOUNCE);
-      }
-
-      SettingsMenu.MoveDown();
-    }
-
-    if (!ss.digitalRead(SS_SWITCH_SELECT)) {
-      while (!ss.digitalRead(SS_SWITCH_SELECT)) {
-        delay(DEBOUNCE);
-      }
-
-      EditInformationOptions = SettingsMenu.selectRow();
-    }
-  }
-}
 void ProcessMainMenu() {
 
   // set an inital flag that will be used to store what menu item the user exited on
@@ -248,8 +124,6 @@ void ProcessMainMenu() {
 
     Position = ss.getEncoderPosition();
     delay(DEBOUNCE);
-    // Serial.print("Encoder position: ");
-    // Serial.println(Position);
     if ((Position - oldPosition) > 0) {
       while (oldPosition != Position) {
         oldPosition = Position;
@@ -261,7 +135,6 @@ void ProcessMainMenu() {
     }
 
     if ((Position - oldPosition) < 0) {
-
       while (oldPosition != Position) {
         oldPosition = Position;
         Position = ss.getEncoderPosition();
@@ -285,36 +158,31 @@ void ProcessMainMenu() {
       // here is where you process accordingly
       // remember on pressing button on title bar 0 is returned and will exit the loop
       if (MainMenuOption == MenuOption1) {
-        //ProcessInformationMenu();
         informationMenuHandler.Handle();
-
         Display.fillScreen(MENU_BACKGROUND);
         MainMenu.draw();
       }
 
       if (MainMenuOption == MenuOption2) {
-        //ProcessGamesMenu();
-        diag.log("ss version: ");
-        diag.logln(ss.getVersion());
         gamesMenuHandler.Handle();
         Display.fillScreen(MENU_BACKGROUND);
         MainMenu.draw();
       }
 
       if (MainMenuOption == MenuOption3) {
-        ProcessCalibrationMenu();
+        calibrationMenuHandler.Handle();
         Display.fillScreen(MENU_BACKGROUND);
         MainMenu.draw();
       }
 
       if (MainMenuOption == MenuOption4) {
-        ProcessUtilitiesMenu();
+        utilitiesMenuHandler.Handle();
         Display.fillScreen(MENU_BACKGROUND);
         MainMenu.draw();
       }
 
       if (MainMenuOption == MenuOption5) {
-        ProcessSettingsMenu();
+        settingsMenuHandler.Handle();
         Display.fillScreen(MENU_BACKGROUND);
         MainMenu.draw();
       }      
