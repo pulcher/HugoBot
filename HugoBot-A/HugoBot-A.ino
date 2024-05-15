@@ -285,7 +285,7 @@ void SetupOpticalFlowSensor()
 {
     if (!flow.begin()) {
     Serial.println("Initialization of the flow sensor failed");
-    // while(1) { }
+    while(1) { }
   }
 }
 
@@ -364,8 +364,8 @@ void setup() {
   // // fire up the BNO085 IMU
   // // SetupImuSensor();
 
-  // // fire up the PAA5100JE-O
-  // //SetupOpticalFlowSensor();
+  // fire up the PAA5100JE-O
+  SetupOpticalFlowSensor();
 
   // // fire up Serial1 connectivity to MegaPi
   // //SetupSerial1ToMegaPi();
@@ -782,16 +782,22 @@ void DisplayImu () {
   }
 }
 
+int16_t x = 0, y = 0;
+
 void DisplayOpticalFlow () {
   int16_t deltaX, deltaY;
+
 
   // Get motion count since last call
   flow.readMotionCount(&deltaX, &deltaY);
 
+  x = x + deltaX;
+  y = y + deltaY;
+
   Serial.print("X: ");
-  Serial.print(deltaX);
+  Serial.print(x);
   Serial.print(", Y: ");
-  Serial.print(deltaY);
+  Serial.print(y);
   Serial.print("\n");
 }
 
@@ -801,10 +807,10 @@ void loop() {
 
   // DisplayImu();
 
-  // DisplayOpticalFlow();
+  DisplayOpticalFlow();
 
   //DoSerial8Stuff();
 
   diag.logln("loop....");
-  delay(500);
+  delay(50);
 }
