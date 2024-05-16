@@ -240,12 +240,13 @@ void Setup8x8Sensor() {
 }
 
 void SetupImuSensor() {
- if (!bno08x.begin_I2C(0x4a, &Wire1, 0)) {
+ if (!bno08x.begin_I2C(0x4a, &Wire, 0)) {
     Serial.println("Failed to find BNO08x chip");
-    // while (1) {
-    //   delay(10);
-    // }
+    while (1) {
+      delay(10);
+    }
   }
+
   Serial.println("BNO08x Found!");
 
   for (int n = 0; n < bno08x.prodIds.numEntries; n++) {
@@ -276,8 +277,11 @@ void setReports(void) {
   // if (!bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED)) {
   //   Serial.println("Could not enable gyroscope");
   // }
-  if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
-    Serial.println("Could not enable magnetic field calibrated");
+  // if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
+  //   Serial.println("Could not enable magnetic field calibrated");
+  // }
+    if (!bno08x.enableReport(SH2_ROTATION_VECTOR)) {
+    Serial.println("Could not enable rotation vector");
   }
 }
 
@@ -289,7 +293,7 @@ void SetupOpticalFlowSensor()
   }
 }
 
-void SetupSerial1ToMegaPi() {
+void SetupSerial8ToMegaPi() {
   Serial8.begin(9600, SERIAL_8N1);
 
   // Add values in the document
@@ -361,14 +365,14 @@ void setup() {
   // // fire up the VL53L5CX 8x8 Time of Flight (ToF) Array Sensor
   // // Setup8x8Sensor();
 
-  // // fire up the BNO085 IMU
-  // // SetupImuSensor();
+  // fire up the BNO085 IMU
+  SetupImuSensor();
 
   // fire up the PAA5100JE-O
   SetupOpticalFlowSensor();
 
-  // // fire up Serial1 connectivity to MegaPi
-  // //SetupSerial1ToMegaPi();
+  // fire up Serial1 connectivity to MegaPi
+  SetupSerial8ToMegaPi();
 
   // fire up the display
   Display.initR(INITR_GREENTAB);
@@ -805,9 +809,9 @@ void loop() {
   
   // DisplayLidar();
 
-  // DisplayImu();
+  DisplayImu();
 
-  DisplayOpticalFlow();
+  //DisplayOpticalFlow();
 
   //DoSerial8Stuff();
 
