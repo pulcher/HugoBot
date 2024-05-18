@@ -499,6 +499,7 @@ void setup() {
 
   // // menu code done, now proceed to your code
   // Display.fillScreen(MENU_BACKGROUND);
+
 }
 
 void DoSerial8Stuff() {
@@ -787,10 +788,16 @@ void DisplayImu () {
 }
 
 int16_t x = 0, y = 0;
+int16_t deltaX, deltaY;
+float xDistance = 0.0, yDistance = 0.0, angle = 0.0;
+
+char outputBuffer[50];
+char xStr[16];
+char yStr[16];
+char angleStr[16];
 
 void DisplayOpticalFlow () {
-  int16_t deltaX, deltaY;
-
+  //int16_t deltaX, deltaY;
 
   // Get motion count since last call
   flow.readMotionCount(&deltaX, &deltaY);
@@ -805,15 +812,53 @@ void DisplayOpticalFlow () {
   Serial.print("\n");
 }
 
+void displayStatus() {
+  Display.setTextWrap(false);
+  Display.fillScreen(ST77XX_BLACK);
+  Display.setCursor(0, 15);
+  Display.setTextColor(ST77XX_WHITE);
+  Display.setTextSize(1);
+
+  dtostrf(xDistance, 8, 3, xStr);
+  dtostrf(yDistance, 8, 3, yStr);
+  dtostrf(angle, 9, 5, angleStr);
+
+  outputBuffer[0] = '\0';
+  sprintf(outputBuffer, "xt: %d, x: %s", x, xStr);
+  Display.println(outputBuffer);
+  Serial.println(outputBuffer);
+
+  outputBuffer[0] = '\0';
+  sprintf(outputBuffer, "yt: %d, y: %s", y, yStr);
+  Display.println(outputBuffer);
+  Serial.println(outputBuffer);
+
+  outputBuffer[0] = '\0';
+  sprintf(outputBuffer, "Angle: %s", angleStr);
+  Display.println(outputBuffer);
+  Serial.println(outputBuffer);
+
+}
+
 void loop() {
   
   // DisplayLidar();
 
-  DisplayImu();
+  //DisplayImu();
+
+  flow.readMotionCount(&deltaX, &deltaY);
+
+  x = x + deltaX;
+  y = y + deltaY;
+
+  xDistance = x * 0.234;
+  yDistance = y * 0.416;
 
   //DisplayOpticalFlow();
 
   //DoSerial8Stuff();
+
+  displayStatus();
 
   diag.logln("loop....");
   delay(50);
