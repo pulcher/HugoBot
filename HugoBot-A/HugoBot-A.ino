@@ -280,7 +280,11 @@ void setReports(void) {
   // if (!bno08x.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED)) {
   //   Serial.println("Could not enable magnetic field calibrated");
   // }
-    if (!bno08x.enableReport(SH2_ROTATION_VECTOR)) {
+  // if (!bno08x.enableReport(SH2_GAME_ROTATION_VECTOR)) {
+  //     Serial.println("Could not enable rotation vector");  
+  // }
+
+  if (!bno08x.enableReport(SH2_ROTATION_VECTOR)) {
     Serial.println("Could not enable rotation vector");
   }
 }
@@ -789,12 +793,19 @@ void DisplayImu () {
 
 int16_t x = 0, y = 0;
 int16_t deltaX, deltaY;
-float xDistance = 0.0, yDistance = 0.0, angle = 0.0;
+double xDistance = 0.0, yDistance = 0.0;
+double angle = 0.0, angleNormalized = 0.0, angleInit = 0.0, fudgeAngle = 0.0;
+double expectedInit = 0.0, heading = 0.0;
+bool angleInitialized = false;
+double qw, qx, qy, qz, yaw;
 
 char outputBuffer[50];
 char xStr[16];
 char yStr[16];
 char angleStr[16];
+char angleNormalizedStr[16];
+char angleInitStr[16];
+char headingStr[16];
 
 void DisplayOpticalFlow () {
   //int16_t deltaX, deltaY;
@@ -812,16 +823,76 @@ void DisplayOpticalFlow () {
   Serial.print("\n");
 }
 
+void getRealHeading() {
+  heading = angle + fudgeAngle;
+
+  if (heading < 0) {
+    heading += 360.0;
+  }
+}
+
+void getHeading() {
+  flow.readMotionCount(&deltaX, &deltaY);
+
+  x = x + deltaX;
+  y = y + deltaY;
+
+  xDistance = x * 0.234;
+  yDistance = y * 0.416;
+
+  sh2_SensorValue_t sensorValue;
+  
+  if (bno08x.wasReset()) {
+    Serial.print("***************************** sensor was reset ***********************");
+    delay(5000);
+
+    setReports();
+  }
+
+  if (bno08x.getSensorEvent(&sensorValue)) {
+    // calculate angle
+
+    qw = sensorValue.un.rotationVector.real;
+    qx = sensorValue.un.rotationVector.i;
+    qy = sensorValue.un.rotationVector.j;
+    qz = sensorValue.un.rotationVector.k;
+
+    // yaw = atan2(2.0*(qy*qw + qx*qz), 1.0 - 2.0*(qy*qy + qz*qz));
+    angle = yaw * 180.0 / PI; // convert to degrees
+
+    double siny_cosp = 2 * ((qw * qz) + (qx * qy)); 
+    double cosy_cosp = 1 - (2 * ((qy * qy) + (qz * qz))); 
+    yaw = std::atan2(siny_cosp, cosy_cosp);
+    angle = angleNormalized = yaw * 180.0 / PI; // convert to degrees
+
+    // normalize to 0 - 360
+    if (angle < 0) {
+      angleNormalized = angle + 360.0;
+    }
+
+    if(!angleInitialized) {
+      angleInitialized = true;
+      angleInit = angle;
+      fudgeAngle = expectedInit - angleInit;
+    }
+
+    getRealHeading();
+}
+}
+
 void displayStatus() {
   Display.setTextWrap(false);
   Display.fillScreen(ST77XX_BLACK);
   Display.setCursor(0, 15);
   Display.setTextColor(ST77XX_WHITE);
-  Display.setTextSize(1);
+  Display.setTextSize(0);
 
   dtostrf(xDistance, 8, 3, xStr);
   dtostrf(yDistance, 8, 3, yStr);
   dtostrf(angle, 9, 5, angleStr);
+  dtostrf(angleNormalized, 9, 5, angleNormalizedStr);
+  dtostrf(angleInit, 9, 5, angleInitStr);
+  dtostrf(heading, 9, 5, headingStr);
 
   outputBuffer[0] = '\0';
   sprintf(outputBuffer, "xt: %d, x: %s", x, xStr);
@@ -833,11 +904,35 @@ void displayStatus() {
   Display.println(outputBuffer);
   Serial.println(outputBuffer);
 
+  // outputBuffer[0] = '\0';
+  // sprintf(outputBuffer, "qw: %d, qx : %s", w, xStr);
+  // Display.println(outputBuffer);
+  // Serial.println(outputBuffer);
+
+  // outputBuffer[0] = '\0';
+  // sprintf(outputBuffer, "qy: %d, qz: %s", y, yStr);
+  // Display.println(outputBuffer);
+  // Serial.println(outputBuffer);
+
+  outputBuffer[0] = '\0';
+  sprintf(outputBuffer, "Angle Init: %s", angleInitStr);
+  Display.println(outputBuffer);
+  Serial.println(outputBuffer);
+
   outputBuffer[0] = '\0';
   sprintf(outputBuffer, "Angle: %s", angleStr);
   Display.println(outputBuffer);
   Serial.println(outputBuffer);
 
+  // outputBuffer[0] = '\0';
+  // sprintf(outputBuffer, "Angle Norm: %s", angleNormalizedStr);
+  // Display.println(outputBuffer);
+  // Serial.println(outputBuffer);
+
+  outputBuffer[0] = '\0';
+  sprintf(outputBuffer, "Heading: %s", headingStr);
+  Display.println(outputBuffer);
+  Serial.println(outputBuffer);
 }
 
 void loop() {
@@ -846,13 +941,8 @@ void loop() {
 
   //DisplayImu();
 
-  flow.readMotionCount(&deltaX, &deltaY);
+  getHeading();
 
-  x = x + deltaX;
-  y = y + deltaY;
-
-  xDistance = x * 0.234;
-  yDistance = y * 0.416;
 
   //DisplayOpticalFlow();
 
@@ -860,6 +950,5 @@ void loop() {
 
   displayStatus();
 
-  diag.logln("loop....");
   delay(50);
 }
