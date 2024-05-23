@@ -358,7 +358,7 @@ void SetupDiagnosticDisplay() {
 
 void setup() {
 
-  Serial.begin(115200);
+  // Serial.begin(115200);
   Serial.println("Starting setup....");
 
   SetupDiagnosticDisplay();
@@ -504,6 +504,11 @@ void setup() {
   // // menu code done, now proceed to your code
   // Display.fillScreen(MENU_BACKGROUND);
 
+  Display.setTextWrap(false);
+  Display.fillScreen(ST77XX_BLACK);
+  Display.setCursor(0, 15);
+  Display.setTextColor(ST77XX_WHITE);
+  Display.setTextSize(0);
 }
 
 void DoSerial8Stuff() {
@@ -837,8 +842,8 @@ void getHeading() {
   x = x + deltaX;
   y = y + deltaY;
 
-  xDistance = x * 0.234;
-  yDistance = y * 0.416;
+  xDistance = x * 0.085;
+  yDistance = y * 0.085;
 
   sh2_SensorValue_t sensorValue;
   
@@ -858,7 +863,7 @@ void getHeading() {
     qz = sensorValue.un.rotationVector.k;
 
     // yaw = atan2(2.0*(qy*qw + qx*qz), 1.0 - 2.0*(qy*qy + qz*qz));
-    angle = yaw * 180.0 / PI; // convert to degrees
+    // angle = yaw * 180.0 / PI; // convert to degrees
 
     double siny_cosp = 2 * ((qw * qz) + (qx * qy)); 
     double cosy_cosp = 1 - (2 * ((qy * qy) + (qz * qz))); 
