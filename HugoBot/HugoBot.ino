@@ -67,11 +67,20 @@ JsonDocument doc;
 
 void loop() {
   
-  if (isAutonomous) {
-    handleSerial2();
+  MePS2.loop();
+
+  if (MePS2.ButtonPressed(MeJOYSTICK_SELECT))
+  {
+    isAutonomous = !isAutonomous;
+    Serial.print("isAutonomous: ");
+    Serial.println(isAutonomous);
+
+    delay(100);
   }
 
-  MePS2.loop();
+  if (isAutonomous) {
+    handleSerial2();
+  } else {
   
   if (MePS2.ButtonPressed(MeJOYSTICK_UP))
   {
@@ -133,12 +142,6 @@ void loop() {
   //   Serial.println("START is pressed!");
   // }
 
-  if (MePS2.ButtonPressed(MeJOYSTICK_SELECT))
-  {
-    isAutonomous = !isAutonomous;
-    delay(100);
-  }
-
   if (MePS2.ButtonPressed(MeJOYSTICK_L1))
   {
     Serial.println("BUTTON_L1 is pressed!");
@@ -185,7 +188,7 @@ void loop() {
 
 
   handleJoystick(MeJOYSTICK_RX, MeJOYSTICK_RY);
-
+  }
   if (!buttonPressed && !isAutonomous) {
     moveBot(DIRECTION_NONE, 0);
   }
@@ -205,10 +208,10 @@ void handleJoystick(uint8_t x, uint8_t y) {
   double degreeAngle = radianAngle * 180/PI;
 
   if (abs(xRead) > 0 || abs(yRead) > 0) {
-    Serial.print("Right joystick angle value is: ");
-    Serial.print(degreeAngle);
-    Serial.print(", ");
-    Serial.println(radianAngle);
+    // Serial.print("Right joystick angle value is: ");
+    // Serial.print(degreeAngle);
+    // Serial.print(", ");
+    // Serial.println(radianAngle);
   }
   
   delay(100);
@@ -225,6 +228,10 @@ void handleSerial2() {
       uint8_t direction = doc["data"]["direction"];
       uint8_t speed = doc["data"]["speed"];
 
+      Serial.print("direction: ");
+      Serial.print(direction);
+      Serial.print(", Speed: ");
+      Serial.print(speed);
       moveBot(direction, speed);
     }
   }
@@ -234,15 +241,15 @@ void handleSerial2() {
 
 void moveBot(uint8_t botDirection, uint16_t speed) {
   auto direction = Directions[botDirection];
-  Serial.print("botDirection: ");
-  Serial.print(botDirection);
-  Serial.print(", ");
-  Serial.print("direction[WHEELS_FRONT][WHEELS_LEFT]: ");
-  Serial.print(direction[WHEELS_FRONT][WHEELS_LEFT]);
-  Serial.print(", ");
-  Serial.print("All_Wheels[WHEELS_FRONT][WHEELS_LEFT]: ");
-  Serial.print(All_Wheels[WHEELS_FRONT][WHEELS_LEFT]);
-  Serial.println("");
+  // Serial.print("botDirection: ");
+  // Serial.print(botDirection);
+  // Serial.print(", ");
+  // Serial.print("direction[WHEELS_FRONT][WHEELS_LEFT]: ");
+  // Serial.print(direction[WHEELS_FRONT][WHEELS_LEFT]);
+  // Serial.print(", ");
+  // Serial.print("All_Wheels[WHEELS_FRONT][WHEELS_LEFT]: ");
+  // Serial.print(All_Wheels[WHEELS_FRONT][WHEELS_LEFT]);
+  // Serial.println("");
 
   setWheelSpeed(MOTOR_LF, direction[WHEELS_FRONT][WHEELS_LEFT]  * All_Wheels[WHEELS_FRONT][WHEELS_LEFT]  * speed);
   setWheelSpeed(MOTOR_RF, direction[WHEELS_FRONT][WHEELS_RIGHT] * All_Wheels[WHEELS_FRONT][WHEELS_RIGHT] * speed);

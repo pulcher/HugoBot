@@ -525,8 +525,8 @@ void DoSerial8Stuff() {
   doc["operation"] = "move";
 
   JsonObject dataDoc = doc["data"].to<JsonObject>();
-  dataDoc["direction"] = DIRECTION_F;
-  dataDoc["speed"] = 100;
+  dataDoc["direction"] = DIRECTION_ROTL;
+  dataDoc["speed"] = 50;
   dataDoc["timeMS"] = 1000;
   
   serializeJson(doc, Serial8);
@@ -537,26 +537,12 @@ void DoSerial8Stuff() {
   // wait for 2 seconds
   delay(2000);
 
-  // stop
   doc.clear();
-  // go forward at full speed 
   doc["operation"] = "move";
 
   dataDoc = doc["data"].to<JsonObject>();
   dataDoc["direction"] = DIRECTION_NONE;
   dataDoc["speed"] = 0;
-  dataDoc["timeMS"] = 1;
-
-  serializeJson(doc, Serial8);
-  Serial8.println();
-
-  // go reverse at full speed
-  doc.clear();
-  doc["operation"] = "move";
-
-  dataDoc = doc["data"].to<JsonObject>();
-  dataDoc["direction"] = DIRECTION_R;
-  dataDoc["speed"] = 100;
   dataDoc["timeMS"] = 1000;
   
   serializeJson(doc, Serial8);
@@ -567,14 +553,45 @@ void DoSerial8Stuff() {
   // wait for 2 seconds
   delay(2000);
 
-  // stop
+ 
+ 
+ 
+  // // go forward at full speed 
+  // doc["operation"] = "move";
 
+  // dataDoc = doc["data"].to<JsonObject>();
+  // dataDoc["direction"] = DIRECTION_NONE;
+  // dataDoc["speed"] = 0;
+  // dataDoc["timeMS"] = 1;
 
+  // serializeJson(doc, Serial8);
+  // Serial8.println();
+
+  // // go reverse at full speed
+  // doc.clear();
+  // doc["operation"] = "move";
+
+  // dataDoc = doc["data"].to<JsonObject>();
+  // dataDoc["direction"] = DIRECTION_R;
+  // dataDoc["speed"] = 100;
+  // dataDoc["timeMS"] = 1000;
+  
   // serializeJson(doc, Serial8);
   // Serial8.println();
 
   // serializeJson(doc, Serial);
   // Serial.println();
+  // // wait for 2 seconds
+  // delay(2000);
+
+  // // stop
+
+
+  // // serializeJson(doc, Serial8);
+  // // Serial8.println();
+
+  // // serializeJson(doc, Serial);
+  // // Serial.println();
 }
 
 void DisplayLidar() {
@@ -946,7 +963,7 @@ void loop() {
 
   //DisplayOpticalFlow();
 
-  //DoSerial8Stuff();
+  DoSerial8Stuff();
 
   displayStatus();
 
