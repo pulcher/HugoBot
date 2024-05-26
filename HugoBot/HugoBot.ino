@@ -5,6 +5,7 @@
 #include <ArduinoJson.h>
 #include "directions.h"
 
+#define MAXSPEED 100
 #define NUM_MOTORS 4
 #define MOTOR_LF 0
 #define MOTOR_RF 1
@@ -47,6 +48,8 @@ MeMegaPiDCMotor motors[] = {motor0, motor1, motor2, motor3};
 int8_t motors_pwm[NUM_MOTORS];
 int8_t motors_pwm_previous[NUM_MOTORS];
 
+int8_t currentSpeed = MAXSPEED;
+
 void setup() {
   Serial.begin(115200);
   Serial2.begin(9600);
@@ -86,7 +89,7 @@ void loop() {
   {
     Serial.println("UP is pressed!");
 
-    moveBot(DIRECTION_F, 100);
+    moveBot(DIRECTION_F, currentSpeed);
     buttonPressed = true;
   }
 
@@ -94,7 +97,7 @@ void loop() {
   {
     Serial.println("DOWN is pressed!");
 
-    moveBot(DIRECTION_R, 100);
+    moveBot(DIRECTION_R, currentSpeed);
     buttonPressed = true;
   }
 
@@ -102,7 +105,7 @@ void loop() {
   {
     Serial.println("LEFT is pressed!");
         
-    moveBot(DIRECTION_SL, 100);
+    moveBot(DIRECTION_SL, currentSpeed);
     buttonPressed = true;
   }
 
@@ -110,7 +113,7 @@ void loop() {
   {
     Serial.println("RIGHT is pressed!");
 
-    moveBot(DIRECTION_SR, 100);
+    moveBot(DIRECTION_SR, currentSpeed);
     buttonPressed = true;
   }
 
@@ -118,7 +121,7 @@ void loop() {
   {
     Serial.println("TRIANGLE(1) is pressed!");
 
-    moveBot(DIRECTION_ROTL, 100);
+    moveBot(DIRECTION_ROTL, currentSpeed);
     buttonPressed = true;
   }
   // if (MePS2.ButtonPressed(MeJOYSTICK_XSHAPED))
@@ -129,7 +132,7 @@ void loop() {
   {
     Serial.println("SQUARE(4) is pressed!");
 
-    moveBot(DIRECTION_ROTR, 100);
+    moveBot(DIRECTION_ROTR, currentSpeed);
     buttonPressed = true;
   }
   // if (MePS2.ButtonPressed(MeJOYSTICK_ROUND))
@@ -137,16 +140,21 @@ void loop() {
   //   Serial.println("ROUND is pressed!");
   // }
 
-  // if (MePS2.ButtonPressed(MeJOYSTICK_START))
-  // {
-  //   Serial.println("START is pressed!");
-  // }
+  if (MePS2.ButtonPressed(MeJOYSTICK_START))
+  {
+    Serial.println("START is pressed!");
+    if (currentSpeed == MAXSPEED) {
+      currentSpeed = MAXSPEED/2;
+    } else {
+      currentSpeed = MAXSPEED;
+    }
+  }
 
   if (MePS2.ButtonPressed(MeJOYSTICK_L1))
   {
     Serial.println("BUTTON_L1 is pressed!");
 
-    moveBot(DIRECTION_FL, 100);
+    moveBot(DIRECTION_FL, currentSpeed);
     buttonPressed = true;
   }
 
@@ -154,7 +162,7 @@ void loop() {
   {
     Serial.println("BUTTON_L2 is pressed!");
 
-    moveBot(DIRECTION_RL, 100);
+    moveBot(DIRECTION_RL, currentSpeed);
     buttonPressed = true;
   }
 
@@ -162,7 +170,7 @@ void loop() {
   {
     Serial.println("BUTTON_R1 is pressed!");
 
-    moveBot(DIRECTION_FR, 100);
+    moveBot(DIRECTION_FR, currentSpeed);
     buttonPressed = true;
   }
 
@@ -170,7 +178,7 @@ void loop() {
   {
     Serial.println("BUTTON_R2 is pressed!");
 
-    moveBot(DIRECTION_RR, 100);
+    moveBot(DIRECTION_RR, currentSpeed);
     buttonPressed = true;
   }
 
