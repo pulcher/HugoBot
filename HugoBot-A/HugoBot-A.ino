@@ -813,7 +813,7 @@ void DisplayImu () {
   }
 }
 
-int16_t x = 0, y = 0;
+double x = 0, y = 0;
 int16_t deltaX, deltaY;
 double xDistance = 0.0, yDistance = 0.0;
 double angle = 0.0, angleNormalized = 0.0, angleInit = 0.0, fudgeAngle = 0.0;
@@ -824,6 +824,8 @@ double qw, qx, qy, qz, yaw;
 char outputBuffer[50];
 char xStr[16];
 char yStr[16];
+char xDistanceStr[16];
+char yDistanceStr[16];
 char angleStr[16];
 char angleNormalizedStr[16];
 char angleInitStr[16];
@@ -859,8 +861,8 @@ void getHeading() {
   x = x + deltaX;
   y = y + deltaY;
 
-  xDistance = x * 0.085;
-  yDistance = y * 0.085;
+  xDistance = x * 0.0549;
+  yDistance = y * 0.0549;
 
   sh2_SensorValue_t sensorValue;
   
@@ -909,20 +911,22 @@ void displayStatus() {
   Display.setTextColor(ST77XX_WHITE);
   Display.setTextSize(0);
 
-  dtostrf(xDistance, 8, 3, xStr);
-  dtostrf(yDistance, 8, 3, yStr);
+  dtostrf(x, 7, 0, xStr);
+  dtostrf(y, 7, 0, yStr);
+  dtostrf(xDistance, 9, 3, xDistanceStr);
+  dtostrf(yDistance, 9, 3, yDistanceStr);
   dtostrf(angle, 9, 5, angleStr);
   dtostrf(angleNormalized, 9, 5, angleNormalizedStr);
   dtostrf(angleInit, 9, 5, angleInitStr);
   dtostrf(heading, 9, 5, headingStr);
 
   outputBuffer[0] = '\0';
-  sprintf(outputBuffer, "xt: %d, x: %s", x, xStr);
+  sprintf(outputBuffer, "xt: %s, x: %s", xStr, xDistanceStr);
   Display.println(outputBuffer);
   Serial.println(outputBuffer);
 
   outputBuffer[0] = '\0';
-  sprintf(outputBuffer, "yt: %d, y: %s", y, yStr);
+  sprintf(outputBuffer, "yt: %s, y: %s", yStr, yDistanceStr);
   Display.println(outputBuffer);
   Serial.println(outputBuffer);
 
@@ -968,7 +972,7 @@ void loop() {
 
   //DisplayOpticalFlow();
 
-  DoSerial8Stuff();
+  //DoSerial8Stuff();
 
   displayStatus();
 
