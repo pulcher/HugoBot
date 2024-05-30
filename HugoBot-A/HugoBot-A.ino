@@ -961,6 +961,55 @@ void displayStatus() {
   Serial.println(outputBuffer);
 }
 
+#define QT_START            0
+#define QT_GO               1
+#define QT_ADJUST_X         2
+#define QT_ENDPOINT_REACHED 3
+#define QT_RETURN           4
+#define QT_FINISH           5
+
+uint currentCourseState = QT_START;
+
+void doQuikTrip() {
+  switch(currentCourseState) {
+    case QT_START:
+      /*
+       * Set travelDistance
+       * Set startDistance
+       * Set desiredHeading
+       * Set headingTolerance
+       * Change state to QT_GO
+       */
+    case QT_GO:
+      /*
+       * checkHeading(desired, tolerance)
+       * correctHeading()
+       * checkDistance()
+       * if at distance
+       *  doStop();
+       *  Change state to QT_ADJUST_X
+       */
+    case QT_ADJUST_X:
+      /*
+        slide(numberTicks)
+      */
+    case QT_ENDPOINT_REACHED:
+      /*
+       * Change state to QT_RETURN
+       */
+    case QT_RETURN:
+      /* like QT_GO but in reverse
+       */
+    case QT_FINISH:
+      /* adjust x
+       * doStop()
+       */
+      return;
+  }
+
+  return;
+}
+
 void loop() {
   
   // DisplayLidar();
@@ -969,6 +1018,9 @@ void loop() {
 
   getHeading();
 
+  doQuikTrip();
+
+  //do4Square();
 
   //DisplayOpticalFlow();
 
