@@ -78,7 +78,10 @@ void loop() {
     Serial.print("isAutonomous: ");
     Serial.println(isAutonomous);
 
-    delay(100);
+    clawOpen();
+    clawClosed();
+    
+    delay(500);
   }
 
   if (isAutonomous) {
@@ -145,8 +148,10 @@ void loop() {
     Serial.println("START is pressed!");
     if (currentSpeed == MAXSPEED) {
       currentSpeed = MAXSPEED/2;
+      clawOpen();
     } else {
       currentSpeed = MAXSPEED;
+      clawClosed();
     }
   }
 
