@@ -813,10 +813,11 @@ void DisplayImu () {
   }
 }
 
-double x = 0, y = 0;
+double x = 0, y = 0, startX, startY;
 int16_t deltaX, deltaY;
 double xDistance = 0.0, yDistance = 0.0;
 double angle = 0.0, angleNormalized = 0.0, angleInit = 0.0, fudgeAngle = 0.0;
+double xInitial, yInitial, goalWidth;
 double expectedInit = 0.0, heading = 0.0;
 bool angleInitialized = false;
 double qw, qx, qy, qz, yaw;
@@ -963,23 +964,60 @@ void displayStatus() {
 
 #define QT_START            0
 #define QT_GO               1
-#define QT_ADJUST_X         2
+#define QT_GOAL_ADJUST_X    2
 #define QT_ENDPOINT_REACHED 3
 #define QT_RETURN           4
-#define QT_FINISH           5
+#define QT_RETURN_ADJUST_X  5
+#define QT_FINISH           6
+
+#define QT_GOAL_DISTANCE    55123
+#define QT_GOAL_BAND        1234
+#define QT_ANGLE_RANGE      3.0
+
+#define  QT_MAX_SPEED       100
 
 uint currentCourseState = QT_START;
+
+void sendMove(byte direction, byte speed, int timeMs) {
+  // sample
+// {
+//   "operation": "move",
+//   "data": {
+//     "direction": "NW",
+//     "speed": "50",
+//     "timeMS": 500
+//   }
+// }
+
+  JsonDocument doc;
+
+  doc.clear();
+  
+  doc["operation"] = "move";
+
+  JsonObject dataDoc = doc["data"].to<JsonObject>();
+  dataDoc["direction"] = direction;
+  dataDoc["speed"] = speed;
+  dataDoc["timeMS"] = timeMs;
+  
+  serializeJson(doc, Serial8);
+  Serial8.println();
+
+  serializeJson(doc, Serial);
+  Serial.println();
+}
 
 void doQuikTrip() {
   switch(currentCourseState) {
     case QT_START:
-      /*
-       * Set travelDistance
-       * Set startDistance
-       * Set desiredHeading
-       * Set headingTolerance
-       * Change state to QT_GO
-       */
+      fudgeAngle = QT_ANGLE_RANGE;
+
+      startX = x;
+      startY = y;
+
+      currentCourseState = QT_GO;
+      sendMove( DIRECTION_F, QT_MAX_SPEED, 20);
+      break;
     case QT_GO:
       /*
        * checkHeading(desired, tolerance)
@@ -989,25 +1027,35 @@ void doQuikTrip() {
        *  doStop();
        *  Change state to QT_ADJUST_X
        */
-    case QT_ADJUST_X:
+       break;
+    case QT_GOAL_ADJUST_X:
       /*
         slide(numberTicks)
       */
+      break;
     case QT_ENDPOINT_REACHED:
       /*
        * Change state to QT_RETURN
        */
+       break;
     case QT_RETURN:
       /* like QT_GO but in reverse
        */
+       break;
+    case QT_RETURN_ADJUST_X:
+      /*
+        slide(numberTicks)
+      */
+      break;
     case QT_FINISH:
       /* adjust x
        * doStop()
        */
-      return;
+      break;
+    default:
+      sendMove(DIRECTION_NONE, 0, 1000);
+      break;
   }
-
-  return;
 }
 
 void loop() {
