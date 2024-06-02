@@ -511,93 +511,93 @@ void setup() {
   Display.setTextSize(0);
 }
 
-void DoSerial8Stuff() {
+// void DoSerial8Stuff() {
 
-// sample
-// {
-//   "operation": "move",
-//   "data": {
-//     "direction": "NW",
-//     "speed": "50",
-//     "timeMS": 500
-//   }
+// // sample
+// // {
+// //   "operation": "move",
+// //   "data": {
+// //     "direction": "NW",
+// //     "speed": "50",
+// //     "timeMS": 500
+// //   }
+// // }
+
+//   JsonDocument doc;
+
+//   doc.clear();
+//   // go forward at full speed 
+//   doc["operation"] = "move";
+
+//   JsonObject dataDoc = doc["data"].to<JsonObject>();
+//   dataDoc["direction"] = DIRECTION_ROTL;
+//   dataDoc["speed"] = 50;
+//   dataDoc["timeMS"] = 1000;
+  
+//   serializeJson(doc, Serial8);
+//   Serial8.println();
+
+//   serializeJson(doc, Serial);
+//   Serial.println();
+//   // wait for 2 seconds
+//   delay(2000);
+
+//   doc.clear();
+//   doc["operation"] = "move";
+
+//   dataDoc = doc["data"].to<JsonObject>();
+//   dataDoc["direction"] = DIRECTION_NONE;
+//   dataDoc["speed"] = 0;
+//   dataDoc["timeMS"] = 1000;
+  
+//   serializeJson(doc, Serial8);
+//   Serial8.println();
+
+//   serializeJson(doc, Serial);
+//   Serial.println();
+//   // wait for 2 seconds
+//   delay(2000);
+
+ 
+ 
+ 
+//   // // go forward at full speed 
+//   // doc["operation"] = "move";
+
+//   // dataDoc = doc["data"].to<JsonObject>();
+//   // dataDoc["direction"] = DIRECTION_NONE;
+//   // dataDoc["speed"] = 0;
+//   // dataDoc["timeMS"] = 1;
+
+//   // serializeJson(doc, Serial8);
+//   // Serial8.println();
+
+//   // // go reverse at full speed
+//   // doc.clear();
+//   // doc["operation"] = "move";
+
+//   // dataDoc = doc["data"].to<JsonObject>();
+//   // dataDoc["direction"] = DIRECTION_R;
+//   // dataDoc["speed"] = 100;
+//   // dataDoc["timeMS"] = 1000;
+  
+//   // serializeJson(doc, Serial8);
+//   // Serial8.println();
+
+//   // serializeJson(doc, Serial);
+//   // Serial.println();
+//   // // wait for 2 seconds
+//   // delay(2000);
+
+//   // // stop
+
+
+//   // // serializeJson(doc, Serial8);
+//   // // Serial8.println();
+
+//   // // serializeJson(doc, Serial);
+//   // // Serial.println();
 // }
-
-  JsonDocument doc;
-
-  doc.clear();
-  // go forward at full speed 
-  doc["operation"] = "move";
-
-  JsonObject dataDoc = doc["data"].to<JsonObject>();
-  dataDoc["direction"] = DIRECTION_ROTL;
-  dataDoc["speed"] = 50;
-  dataDoc["timeMS"] = 1000;
-  
-  serializeJson(doc, Serial8);
-  Serial8.println();
-
-  serializeJson(doc, Serial);
-  Serial.println();
-  // wait for 2 seconds
-  delay(2000);
-
-  doc.clear();
-  doc["operation"] = "move";
-
-  dataDoc = doc["data"].to<JsonObject>();
-  dataDoc["direction"] = DIRECTION_NONE;
-  dataDoc["speed"] = 0;
-  dataDoc["timeMS"] = 1000;
-  
-  serializeJson(doc, Serial8);
-  Serial8.println();
-
-  serializeJson(doc, Serial);
-  Serial.println();
-  // wait for 2 seconds
-  delay(2000);
-
- 
- 
- 
-  // // go forward at full speed 
-  // doc["operation"] = "move";
-
-  // dataDoc = doc["data"].to<JsonObject>();
-  // dataDoc["direction"] = DIRECTION_NONE;
-  // dataDoc["speed"] = 0;
-  // dataDoc["timeMS"] = 1;
-
-  // serializeJson(doc, Serial8);
-  // Serial8.println();
-
-  // // go reverse at full speed
-  // doc.clear();
-  // doc["operation"] = "move";
-
-  // dataDoc = doc["data"].to<JsonObject>();
-  // dataDoc["direction"] = DIRECTION_R;
-  // dataDoc["speed"] = 100;
-  // dataDoc["timeMS"] = 1000;
-  
-  // serializeJson(doc, Serial8);
-  // Serial8.println();
-
-  // serializeJson(doc, Serial);
-  // Serial.println();
-  // // wait for 2 seconds
-  // delay(2000);
-
-  // // stop
-
-
-  // // serializeJson(doc, Serial8);
-  // // Serial8.println();
-
-  // // serializeJson(doc, Serial);
-  // // Serial.println();
-}
 
 void DisplayLidar() {
   //Poll sensor for new data
@@ -813,11 +813,12 @@ void DisplayImu () {
   }
 }
 
-double x = 0, y = 0;
+double x = 0, y = 0, startX, startY;
 int16_t deltaX, deltaY;
 double xDistance = 0.0, yDistance = 0.0;
 double angle = 0.0, angleNormalized = 0.0, angleInit = 0.0, fudgeAngle = 0.0;
-double expectedInit = 0.0, heading = 0.0;
+double xInitial, yInitial, goalWidth;
+double expectedInit = 0.0, heading = 0.0, expectedHeading = 0.0;
 bool angleInitialized = false;
 double qw, qx, qy, qz, yaw;
 
@@ -917,7 +918,7 @@ void displayStatus() {
   dtostrf(yDistance, 9, 3, yDistanceStr);
   dtostrf(angle, 9, 5, angleStr);
   dtostrf(angleNormalized, 9, 5, angleNormalizedStr);
-  dtostrf(angleInit, 9, 5, angleInitStr);
+  dtostrf((angle+fudgeAngle), 9, 5, angleInitStr);
   dtostrf(heading, 9, 5, headingStr);
 
   outputBuffer[0] = '\0';
@@ -941,7 +942,7 @@ void displayStatus() {
   // Serial.println(outputBuffer);
 
   outputBuffer[0] = '\0';
-  sprintf(outputBuffer, "Angle Init: %s", angleInitStr);
+  sprintf(outputBuffer, "Fudge Angle: %s", angleInitStr);
   Display.println(outputBuffer);
   Serial.println(outputBuffer);
 
@@ -961,6 +962,138 @@ void displayStatus() {
   Serial.println(outputBuffer);
 }
 
+#define QT_START            0
+#define QT_GO               1
+#define QT_GOAL_ADJUST_X    2
+#define QT_ENDPOINT_REACHED 3
+#define QT_RETURN           4
+#define QT_RETURN_ADJUST_X  5
+#define QT_FINISH           6
+
+#define QT_GOAL_DISTANCE    55579
+#define QT_GOAL_BAND        1520/2
+#define QT_ANGLE_RANGE      3.0
+
+#define QT_MAX_SPEED        100
+#define QT_ROT_SPEED        30
+
+uint currentCourseState = QT_START;
+
+void doStop() {
+  sendMove(DIRECTION_NONE, 0, 1000);
+}
+
+void doBandCentering() {
+  // x should be 0 or close to it at each end of the course.
+  while(abs(x) > QT_GOAL_BAND) {
+    if ( x > 0) {
+      sendMove(DIRECTION_SR, QT_MAX_SPEED/2, 20);
+    }
+    
+    if (x < 0 ) {
+      sendMove(DIRECTION_SL, QT_MAX_SPEED/2, 20);
+    }
+
+    getHeading();
+    displayStatus();
+  }
+
+  doStop();
+}
+
+void doHeadingAdjust() {
+  while(abs(angle + fudgeAngle) >= QT_ANGLE_RANGE) {
+    if ( angle + fudgeAngle > 0.0) {
+      sendMove(DIRECTION_ROTR, QT_ROT_SPEED, 20);
+    }
+    
+    if ( angle + fudgeAngle < 0.0) {
+      sendMove(DIRECTION_ROTL, QT_ROT_SPEED, 20);
+    }
+
+    getHeading();
+    displayStatus();
+  }
+
+  doStop();
+}
+
+void sendMove(byte direction, byte speed, int timeMs) {
+  // sample
+// {
+//   "operation": "move",
+//   "data": {
+//     "direction": "NW",
+//     "speed": "50",
+//     "timeMS": 500
+//   }
+// }
+
+  JsonDocument doc;
+
+  doc.clear();
+  
+  doc["operation"] = "move";
+
+  JsonObject dataDoc = doc["data"].to<JsonObject>();
+  dataDoc["direction"] = direction;
+  dataDoc["speed"] = speed;
+  dataDoc["timeMS"] = timeMs;
+  
+  serializeJson(doc, Serial8);
+  Serial8.println();
+
+  serializeJson(doc, Serial);
+  Serial.println();
+}
+
+void doQuikTrip() {
+  switch(currentCourseState) {
+    case QT_START:
+      expectedHeading = 0.0;
+
+      startX = x;
+      startY = y;
+
+      currentCourseState = QT_GO;
+      sendMove( DIRECTION_F, QT_MAX_SPEED, 20);
+      break;
+    case QT_GO:
+      if (y > QT_GOAL_DISTANCE) {
+        doStop();
+        currentCourseState = QT_GOAL_ADJUST_X;
+      }
+      break;
+    case QT_GOAL_ADJUST_X:
+      doBandCentering();
+      currentCourseState = QT_ENDPOINT_REACHED;
+      break;
+    case QT_ENDPOINT_REACHED:
+      doHeadingAdjust();
+      currentCourseState = QT_RETURN;
+      sendMove( DIRECTION_R, QT_MAX_SPEED, 20);
+      break;
+    case QT_RETURN:
+      if (y < startY) {
+        doStop();
+        currentCourseState = QT_RETURN_ADJUST_X;
+      }
+  
+      break;
+    case QT_RETURN_ADJUST_X:
+      doBandCentering();
+      currentCourseState = QT_FINISH;
+      break;
+    case QT_FINISH:
+      doStop();
+      doHeadingAdjust();
+      break;
+    default:
+      doStop();
+      break;
+  }
+}
+
 void loop() {
   
   // DisplayLidar();
@@ -969,6 +1102,11 @@ void loop() {
 
   getHeading();
 
+  doHeadingAdjust();
+
+  //doQuikTrip();
+
+  //do4Square();
 
   //DisplayOpticalFlow();
 
