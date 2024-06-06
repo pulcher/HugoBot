@@ -80,7 +80,17 @@ It does correct itself, but still was a bit wonky.
 
 ### JimBot
 
-Need to decide this
+1. Design up JimBot a wooden bigger body.
+2. Use the discount motor w/encoders as drive source
+3. consider followers and differential steering.
+4. Setup storage to collect data
+5. explore I2C access
+6. move to circuit python/arduino
+7. get larger wheels.... that look cool.
+8. add sound and neopixels.
+9. use pulley on the drivetrain.
+10. update power source.
+    - all robots should have similar power sources.
 
 ### HugoBot
 
